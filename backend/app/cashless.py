@@ -59,6 +59,10 @@ def check(app):
     for kind, label in [('admission_advice', 'hospital admission advice'), ('cost_estimate', 'hospital cost estimate')]:
         if kind not in kinds:
             issue('missing_' + kind, f'Add the {label} for the simulated hospital handoff.')
+    if cashless['status'] in ('authorized', 'discharge_review'):
+        for kind, label in [('bill', 'final hospital bill'), ('discharge', 'discharge summary')]:
+            if kind not in kinds:
+                issue('missing_' + kind, f'Add the {label} before simulated final bill review.', 'H5')
     # Compare clinical document names against the selected policy member.
     member = next((m for m in policy['members'] if m['id'] == details.get('member_id')), None)
     for doc in app['documents']:
@@ -110,7 +114,9 @@ def transition(app, action, clarification=''):
         'settled': 'Simulated settlement complete. No funds were transferred.',
     }
     if action == 'authorize':
-        cashless['authorized_amount'] = str((Decimal(cashless['details']['estimated_amount']) * Decimal('0.80')).quantize(Decimal('0.01')))
+        # The simulator records the requested estimate as the decision amount.
+        # A real adapter would return the insurer's calculated eligible amount.
+        cashless['authorized_amount'] = str(Decimal(cashless['details']['estimated_amount']).quantize(Decimal('0.01')))
     cashless['status'] = target
     cashless['timeline'].append({'at': store.now(), 'status': target, 'message': messages[target], 'source': 'simulation'})
     store.mutate(app, 'cashless_simulation_' + target, {'simulation': True, 'message': messages[target]})

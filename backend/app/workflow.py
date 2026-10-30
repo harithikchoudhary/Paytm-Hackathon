@@ -4,6 +4,7 @@ from typing import TypedDict
 from langgraph.graph import StateGraph, START, END
 from .models import FIELDS
 from .policies import POLICY_NUMBER
+from .eligibility import assess
 
 REQUIRED_DOCS = {'policy': 'Policy schedule', 'bill': 'Hospital bill', 'discharge': 'Discharge summary', 'bank_proof': 'Bank account proof'}
 REQUIRED_FIELDS = ['full_name', 'policy_number', 'admission_date', 'discharge_date', 'hospital_name', 'bill_total', 'bank_account_last4', 'policy_start', 'policy_end']
@@ -13,6 +14,7 @@ EXPECTED = {'policy': ['full_name', 'policy_number', 'policy_start', 'policy_end
             'bank_proof': ['bank_account_last4'],
             'admission_advice': ['full_name', 'hospital_name', 'admission_date', 'treatment_summary'],
             'cost_estimate': ['full_name', 'hospital_name', 'estimated_amount']}
+EXPECTED['clarification'] = []
 
 
 class WorkflowState(TypedDict):
@@ -94,6 +96,7 @@ def validate(state):
     if value('bank_account_last4') and (len(value('bank_account_last4')) != 4 or not value('bank_account_last4').isascii() or not value('bank_account_last4').isdigit()):
         issue('invalid_bank', 'Enter exactly four digits for the bank account suffix.', 'C4', field='bank_account_last4')
     app['issues'] = issues
+    app['eligibility'] = assess(app)
     return {'application': app}
 
 

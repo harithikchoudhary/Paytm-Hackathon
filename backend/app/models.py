@@ -1,7 +1,7 @@
 from typing import Literal
 from pydantic import BaseModel, Field
 
-DocumentKind = Literal['policy', 'bill', 'discharge', 'bank_proof', 'admission_advice', 'cost_estimate']
+DocumentKind = Literal['policy', 'bill', 'discharge', 'bank_proof', 'admission_advice', 'cost_estimate', 'clarification']
 FIELDS = {
     'full_name': 'Patient name', 'policy_number': 'Policy number',
     'admission_date': 'Admission date', 'discharge_date': 'Discharge date',
@@ -33,6 +33,20 @@ class SimulationAction(BaseModel):
     model_config = {'extra': 'forbid'}
     action: Literal['submit', 'request_information', 'resubmit', 'authorize', 'decline', 'discharge_review', 'settle']
     clarification: str = Field(default='', max_length=1500)
+
+
+class SubmitClaim(BaseModel):
+    consent: bool
+
+
+class InsurerAction(BaseModel):
+    action: Literal['request_information', 'approve', 'partial_approve', 'reject', 'settle']
+    explanation: str = Field(default='', max_length=2000)
+    approved_amount: str | None = Field(default=None, max_length=30)
+
+
+class ClarificationResponse(BaseModel):
+    response: str = Field(min_length=1, max_length=2000)
 
 
 class Correction(BaseModel):

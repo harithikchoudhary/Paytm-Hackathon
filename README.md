@@ -2,7 +2,7 @@
 
 A local full-stack proof of concept for health insurance cashless assistance and reimbursement against an existing customer policy. React + TypeScript + Tailwind, FastAPI, LangGraph, Vertex AI Gemini, and Google Document AI.
 
-**Cloud mode uses real Document AI OCR and Vertex AI calls. Demo mode uses deterministic sample parsing. Customer schedules, hospital arrangements, and cashless responses are fictional. Insurer process guidance is linked to official HDFC ERGO wording. No journey submits a claim, grants coverage, or transfers funds.**
+**Cloud mode uses real Document AI OCR and Vertex AI calls. Demo mode uses deterministic sample parsing. The supplied OneFlow Care Plus customer schedule, hospital arrangements, and cashless responses are fictional. No journey submits a claim, grants coverage, or transfers funds.**
 
 This workspace is configured in **cloud mode** in the ignored `backend/.env`, using project `project-b222a5e1-4bfe-4261-a4e` and approved OCR processor `8dfc522a55da9b0b` in `us`. Credentials remain in local ADC. The distributable `.env.example` defaults to demo mode.
 
@@ -29,11 +29,11 @@ For frontend development, run `npm run dev` inside `frontend` in another termina
 
 ## Test the customer journeys
 
-Click **Start a claim** or **New journey**. Select the existing demo policy and insured patient, then choose **Cashless assistance** or **Reimbursement**. New customer journeys preload the fictional issued schedule; users upload claim evidence, not the policy wording.
+Click **Start a claim** or **New journey**. The supplied OneFlow Care Plus policy is selected by default; choose the insured patient, then choose **Cashless assistance** or **Reimbursement**. Use **Add a different policy file** to open a separate reimbursement journey for another policy.
 
 ### Cashless assistance
 
-1. Choose **Aarav Sharma**, then **Cashless assistance**. The reference product is HDFC ERGO my:Optima Secure; the issued customer schedule and hospital directory are fictional fixtures.
+1. Choose **Amulya**, then **Cashless assistance**. The reference product is OneFlow Care Plus; the supplied customer schedule and hospital directory are fictional fixtures.
 2. Select **Fill sample details**. This selects Sunrise Care Hospital in Pune, admission on `2026-10-31`, and an INR 80000 estimate. You can also enter these details manually.
 3. Confirm identity/policy readiness and select **Save admission details**. Planned and emergency choices show different notification guidance with an official wording citation.
 4. Download the synthetic **Admission advice** and **Cost estimate** files, then upload each in its matching row. Cloud mode uses real Document AI + Vertex AI processing; demo mode uses deterministic parsing.
@@ -46,7 +46,7 @@ The retained case **Cashless cloud check - simulation** has passed through the r
 
 ### Reimbursement
 
-1. Start a new **Reimbursement** journey for Aarav. The issued schedule is already loaded.
+1. Start a new **Reimbursement** journey for Amulya. The supplied schedule is already loaded.
 2. Download the sample hospital bill, discharge summary, and bank proof from **My documents**. Upload the bill and discharge summary first; bank proof remains a blocker.
 3. Upload bank proof and inspect **Review details**. Patient and policy identity fields come from the existing schedule and cannot be overwritten; replace mismatched claim documents or start a journey for the correct member.
 4. Ask the assistant about the required documents or cashless process. Follow the citation to the original insurer wording or the separately labeled OneFlow POC rule.

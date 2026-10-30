@@ -52,9 +52,9 @@ def advance(client, app_id, action, **kwargs):
 
 def test_existing_policy_preloaded_and_protected(client):
     record = new(client, 'reimbursement')
-    assert record['fields']['policy_number']['value'] == 'DEMO-HEALTH-2026-001'
+    assert record['fields']['policy_number']['value'] == 'OFH-2026-000184'
     assert record['issued_policy']['is_demo'] is True
-    assert any(c['id'] == 'H2' and c['page'] == 49 for c in record['policy_context']['clauses'])
+    assert any(c['id'] == 'H2' and c['page'] == 1 for c in record['policy_context']['clauses'])
     assert any(c['id'] == 'P1' for c in record['policy_context']['clauses'])
     doc = record['documents'][0]
     assert doc['preloaded'] and 'path' not in doc
@@ -77,16 +77,14 @@ def test_bound_reimbursement_with_only_claim_uploads(client):
         assert 'policy-source-reference.json' in z.namelist()
         assert 'trusted-synthetic-policy.pdf' not in z.namelist()
         data = json.loads(z.read('claim-data.json'))
-        assert data['policy_id'] == 'HDFHLIP26058V082526'
+        assert data['policy_id'] == 'OF-CARE-PLUS-2026'
 
 
 def test_cashless_requires_existing_policy_and_valid_patient(client):
     assert client.post('/api/applications', json={'journey': 'cashless'}).status_code == 422
     assert client.post('/api/applications', json={'issued_policy_id': 'invalid'}).status_code == 404
     assert client.post('/api/applications', json={'issued_policy_id': 'customer-health-2026', 'member_id': 'stranger'}).status_code == 422
-    record = new(client, member='meera')
-    assert record['fields']['full_name']['value'] == 'Meera Sharma'
-    assert client.put(f'/api/applications/{record["id"]}/cashless/details', json=details()).status_code == 422
+    assert client.post('/api/applications', json={'issued_policy_id': 'customer-health-2026', 'member_id': 'meera'}).status_code == 422
 
 
 def test_invalid_state_advances_and_missing_documents_block(client):
@@ -107,7 +105,7 @@ def test_full_cashless_simulation_and_persistence(client):
     assert advance(client, app_id, 'resubmit', clarification='short').status_code == 409
     assert advance(client, app_id, 'resubmit', clarification='Synthetic clarification: the estimate includes the advised procedure and hospital stay.').json()['cashless']['status'] == 'resubmitted'
     response = advance(client, app_id, 'authorize')
-    assert response.json()['cashless']['authorized_amount'] == '64000.00'
+    assert response.json()['cashless']['authorized_amount'] == '80000.00'
     assert response.json()['cashless']['simulation'] is True
     assert advance(client, app_id, 'settle').status_code == 409
     assert advance(client, app_id, 'discharge_review').json()['cashless']['status'] == 'discharge_review'

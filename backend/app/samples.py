@@ -34,7 +34,7 @@ def pdf_bytes(title, lines):
 
 
 def sample(kind, conflict=False):
-    name = 'Aarav Shah' if kind == 'bill' and conflict else 'Aarav Sharma'
+    name = 'Amulya' if kind in ('admission_advice', 'cost_estimate') else ('Aarav Shah' if kind == 'bill' and conflict else 'Aarav Sharma')
     common = [f'Patient name: {name}']
     lines = {
         'policy': common + ['Policy number: POC-2026-001', 'Policy start: 2026-01-01', 'Policy end: 2026-12-31', 'Sum insured INR: 500000'],

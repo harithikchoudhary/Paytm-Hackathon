@@ -4,7 +4,7 @@
 
 Implemented a consumer entry point that selects a preloaded fictional issued policy and insured member. Cashless assistance and reimbursement now use separate document requirements and workflows. Cashless covers planned/emergency admission, a fictional hospital directory, source-linked admission advice and cost-estimate extraction, readiness checks, hospital handoff export, and a strictly simulated pre-authorization/query/resubmission/authorization/discharge/settlement timeline. Invalid transitions and changed evidence are checked by the backend.
 
-Insurer process guidance uses concise summaries of official HDFC ERGO my:Optima Secure wording (UIN HDFHLIP26058V082526) with page references. Internal POC checklist rules are labeled separately. The schedule, customer, hospitals, authorization status, and illustrative amounts remain fictional. No insurer/TPA request is made.
+Insurer process guidance uses the supplied two-page OneFlow Care Plus testing policy with page references. Internal POC checklist rules are labeled separately. The schedule, customer, hospitals, authorization status, and illustrative amounts remain fictional. No insurer/TPA request is made.
 
 The UI now uses a predominantly white canvas, navy #002970 sidebar and feature areas, and cyan #00baf2 controls and accents, targeting the requested approximate 70% white / 30% blue balance.
 
