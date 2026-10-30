@@ -1,17 +1,17 @@
-"""Trusted, versioned synthetic rules. Uploaded text cannot change these rules."""
+"""Baseline checklist rules used when an uploaded policy has not supplied a clause."""
 import re
 
 POLICY_ID = 'intentra-health-demo-v1'
-POLICY_NUMBER = 'POC-2026-001'
+POLICY_NUMBER = 'OF-2026-001'
 CLAUSES = [
     {'id': 'C1', 'section': '1. Required documents', 'page': 1,
      'text': 'A reimbursement packet requires the policy schedule, an itemized hospital bill, a discharge summary, and bank account proof.'},
     {'id': 'C2', 'section': '2. Consistent patient details', 'page': 1,
-     'text': 'Patient names must agree across the policy schedule, hospital bill, and discharge summary. The policy number on the schedule must be POC-2026-001 for this synthetic demonstration.'},
+     'text': 'Patient names must agree across the policy schedule, hospital bill, and discharge summary. The policy number must match the schedule supplied by the policyholder.'},
     {'id': 'C3', 'section': '3. Treatment dates', 'page': 1,
      'text': 'Admission must be on or before discharge. Both dates must fall within the policy period shown on the schedule. The bill and discharge summary must identify the same treatment dates.'},
     {'id': 'C4', 'section': '4. Bill and bank details', 'page': 2,
-     'text': 'The packet must include a positive hospital bill total in INR, the hospital name, and the last four digits of the reimbursement bank account. The synthetic policy has a sum insured of INR 500000. A higher bill requires manual review; the assistant does not calculate an approved payout.'},
+     'text': 'The packet must include a positive hospital bill total in INR, the hospital name, and the last four digits of the reimbursement bank account. Any amount above the sum insured shown on the policy schedule requires manual review.'},
     {'id': 'C5', 'section': '5. Review and submission', 'page': 2,
      'text': 'The applicant must review and confirm all extracted details before export. Packet readiness means checklist completion only. Coverage, medical necessity, payout, and claim approval require insurer review.'},
 ]

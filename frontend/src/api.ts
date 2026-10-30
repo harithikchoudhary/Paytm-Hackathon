@@ -9,14 +9,19 @@ export type IssuedPolicy = { id: string; number: string; insurer: string; produc
 export type Hospital = { id: string; name: string; city: string; area: string; network: 'sample_network' | 'unverified'; specialties: string[]; is_demo: boolean }
 export type CashlessDetails = { member_id: string; hospital_id: string; admission_type: 'planned' | 'emergency'; admission_date: string; treatment_summary: string; estimated_amount: string; identity_ready: boolean }
 export type CashlessState = { simulation: boolean; status: string; details: Partial<CashlessDetails>; hospital?: Hospital; authorized_amount: string | null; timeline: { at: string; status: string; message: string; source: string }[] }
-export type Claim = { application_id: string; claim_id: string; acknowledgement_id: string; status: string; submitted_at: string; updated_at: string; claim_amount: string; approved_amount?: string | null; explanation?: string; settlement?: { settled_at: string; settled_amount: string; reference: string } | null; timeline: { at: string; status: string; message: string; source: string; explanation?: string }[] }
+export type Claim = { application_id: string; claim_id: string; acknowledgement_id: string; status: string; submitted_at: string; updated_at: string; claim_amount: string; claim_details?: Record<string, Record<string, string>>; approved_amount?: string | null; explanation?: string; settlement?: { settled_at: string; settled_amount: string; reference: string } | null; timeline: { at: string; status: string; message: string; source: string; explanation?: string }[] }
 export type Eligibility = { status: string; explanation: string; indicative_payable_amount?: string | null; checks: { id: string; result: string; clause_id: string; explanation: string }[] }
-export type Application = { id: string; title: string; status: string; progress: number; documents: Document[]; fields: Record<string, Field>; issues: Issue[]; messages: ChatMessage[]; reviewed_at: string | null; packet_generated_at?: string | null; audit: { at: string; event: string; details: Record<string, unknown> }[]; revision: number; journey?: 'reimbursement' | 'cashless'; issued_policy?: IssuedPolicy; member_id?: string; cashless?: CashlessState; claim?: Claim | null; eligibility?: Eligibility; policy_context: { id: string; name: string; pdf_url: string; clauses: Clause[] } }
+export type Application = { id: string; title: string; status: string; progress: number; documents: Document[]; fields: Record<string, Field>; claim_details?: Record<string, Record<string, string>>; issues: Issue[]; messages: ChatMessage[]; reviewed_at: string | null; packet_generated_at?: string | null; audit: { at: string; event: string; details: Record<string, unknown> }[]; revision: number; journey?: 'reimbursement' | 'cashless'; issued_policy?: IssuedPolicy; member_id?: string; cashless?: CashlessState; claim?: Claim | null; eligibility?: Eligibility; policy_context: { id: string; name: string; pdf_url: string; clauses: Clause[] } }
 export type Summary = Pick<Application, 'id' | 'title' | 'status' | 'progress'>
-export type Health = { mode: 'demo' | 'cloud'; cloud_configured: boolean; missing_configuration: string[]; model: string }
+export type Health = { mode: 'demo' | 'cloud'; cloud_configured: boolean; missing_configuration: string[]; provider?: 'gemini' | 'sarvam'; model: string }
 
 export async function api<T>(path: string, options: RequestInit = {}): Promise<T> {
-  const response = await fetch('/api' + path, { ...options, headers: options.body instanceof FormData ? undefined : { 'Content-Type': 'application/json', ...options.headers } })
+  let identity: { id?: string } = {}
+  try { identity = JSON.parse(localStorage.getItem('oneflow-demo-user') || '{}') } catch { /* no local identity */ }
+  const headers: Record<string, string> = { 'X-OneFlow-User': identity.id || 'demo-user' }
+  if (options.headers) new Headers(options.headers).forEach((value, key) => { headers[key] = value })
+  if (!(options.body instanceof FormData)) headers['Content-Type'] = 'application/json'
+  const response = await fetch('/api' + path, { ...options, headers })
   if (!response.ok) {
     let message = `Request failed (${response.status})`
     try { const data = await response.json(); message = typeof data.detail === 'string' ? data.detail : 'Please check the submitted information.' } catch { /* network or non-JSON response */ }

@@ -1,4 +1,4 @@
-"""Insurer boundary for the POC.
+"""Insurer boundary for the application.
 
 The adapter is deliberately small: a real insurer/TPA implementation can replace
 SimulatedInsurer without changing the claim routes or the frontend contract.

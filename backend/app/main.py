@@ -16,9 +16,10 @@ from .customer import ISSUED_POLICY, HOSPITALS, issued_policy, policy_context, c
 from . import cashless
 from .insurer import simulated_insurer, utc_now
 
+logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s %(name)s %(message)s')
 logger = logging.getLogger('oneflow')
-app = FastAPI(title='OneFlow AI', version='0.2.0', description='Existing-policy reimbursement and simulated cashless assistance POC')
-app.add_middleware(CORSMiddleware, allow_origins=[settings.frontend_origin], allow_methods=['GET', 'POST', 'PUT', 'PATCH', 'DELETE'], allow_headers=['Content-Type'])
+app = FastAPI(title='OneFlow AI', version='0.2.0', description='Existing-policy reimbursement and simulated cashless assistance')
+app.add_middleware(CORSMiddleware, allow_origins=[settings.frontend_origin], allow_methods=['GET', 'POST', 'PUT', 'PATCH', 'DELETE'], allow_headers=['Content-Type', 'X-OneFlow-User'])
 
 
 def current_user(x_oneflow_user: str | None = Header(default=None)):
@@ -44,10 +45,10 @@ def check_cloud():
         raise HTTPException(503, 'Cloud configuration missing: ' + ', '.join(settings.cloud_missing()))
 
 
-def process_document(record, content, name, kind, mime):
+def process_document(record, content, name, kind, mime, replace=False):
     check_cloud()
     pages = providers.read_pages(content, mime)
-    extracted = providers.extract(pages, kind)
+    extracted = providers.extract_with_content(pages, kind, content, name, mime)
     doc_id = str(uuid4())
     directory = settings.oneflow_data_dir / 'uploads' / record['id']
     directory.mkdir(parents=True, exist_ok=True)
@@ -55,7 +56,9 @@ def process_document(record, content, name, kind, mime):
     path = directory / (doc_id + suffix)
     path.write_bytes(content)
     previous = [d for d in record['documents'] if d['kind'] == kind]
-    record['documents'] = [d for d in record['documents'] if d['kind'] != kind]
+    removed = previous if replace else []
+    if replace:
+        record['documents'] = [d for d in record['documents'] if d['kind'] != kind]
     # Replacing a source invalidates related manual confirmations.
     related_keys = {f['key'] for d in previous for f in d['extracted']} | {f['key'] for f in extracted}
     for key in related_keys:
@@ -63,24 +66,25 @@ def process_document(record, content, name, kind, mime):
     record['documents'].append({'id': doc_id, 'name': Path(name.replace('\\', '/')).name[:160],
         'kind': kind, 'mime': mime, 'size': len(content), 'page_count': len(pages),
         'path': str(path), 'pages': pages, 'extracted': extracted,
-        'provider': 'Document AI + Vertex AI' if settings.oneflow_mode == 'cloud' else 'Demo parser', 'uploaded_at': store.now()})
+        'provider': ('Sarvam Vision + Sarvam Chat' if settings.ai_provider == 'sarvam' else 'Document AI + Vertex AI') if settings.oneflow_mode == 'cloud' else 'Demo parser', 'uploaded_at': store.now()})
     if not (record.get('journey') == 'cashless' and kind in ('bill', 'discharge') and (record.get('cashless') or {}).get('status') in ('authorized', 'discharge_review')):
         cashless.invalidate(record)
-    store.mutate(record, 'document_uploaded', {'kind': kind, 'name': name, 'replaced': [d['id'] for d in previous]})
+    store.mutate(record, 'document_uploaded', {'kind': kind, 'name': name, 'replaced': [d['id'] for d in removed], 'appended': not replace})
     result = run(record)
     active_claim = store.get_claim(record['id'])
     if active_claim:
         result['status'] = 'claim_' + active_claim['status']
     result = store.save(result)
-    for old in previous:
+    for old in removed:
         Path(old['path']).unlink(missing_ok=True)
     return result
 
 
 @app.get('/api/health')
 def health():
+    active_model = settings.sarvam_chat_model if settings.ai_provider == 'sarvam' else settings.vertex_model
     return {'status': 'ok', 'mode': settings.oneflow_mode, 'cloud_configured': not settings.cloud_missing(),
-            'missing_configuration': settings.cloud_missing(), 'model': settings.vertex_model,
+            'missing_configuration': settings.cloud_missing(), 'provider': settings.ai_provider, 'model': active_model,
             'policy_id': POLICY_ID, 'synthetic_only': True, 'cashless_simulator': True, 'existing_policy_journeys': True}
 
 
@@ -96,7 +100,14 @@ def policy(application_id: str | None = None):
 
 @app.get('/api/customer/policies')
 def customer_policies():
-    return {'customer': {'name': ISSUED_POLICY['holder'], 'is_demo': True}, 'policies': [ISSUED_POLICY], 'live_integration': False}
+    return {'customer': {'name': '', 'is_demo': True}, 'policies': [], 'live_integration': False}
+
+
+@app.get('/api/customer/profile')
+def customer_profile(user=Header(default='demo-user', alias='X-OneFlow-User')):
+    return {'profile': {'id': user or 'demo-user', 'name': '', 'email': '', 'mobile': '', 'address': '',
+                        'kyc_status': 'Not added', 'notice': 'Add your own details and policy documents for this local demo.'},
+            'policies': [], 'live_integration': False}
 
 
 @app.get('/api/customer/policies/{policy_id}/file')
@@ -116,7 +127,7 @@ def hospitals(q: str = ''):
 def checklist_source():
     context = policy_context({'issued_policy': ISSUED_POLICY})
     lines = [c['section'] + ': ' + c['text'] for c in context['clauses'] if c['id'].startswith('P')]
-    return Response(pdf_bytes('OneFlow POC preparation checks', lines), media_type='application/pdf')
+    return Response(pdf_bytes('OneFlow claim preparation checks', lines), media_type='application/pdf')
 
 
 @app.get('/api/policy/pdf')
@@ -136,7 +147,7 @@ def applications(user=Header(default='demo-user', alias='X-OneFlow-User')):
 
 @app.post('/api/applications', status_code=201)
 def create(body: CreateApplication, user=Header(default='demo-user', alias='X-OneFlow-User')):
-    policy = issued_policy(body.issued_policy_id) if body.issued_policy_id else None
+    policy = issued_policy(body.issued_policy_id) if body.issued_policy_id else body.issued_policy
     if body.issued_policy_id and not policy:
         raise HTTPException(404, 'Customer policy not found.')
     if body.journey == 'cashless' and not policy:
@@ -165,7 +176,7 @@ def get_application(app_id: str, user=Header(default='demo-user', alias='X-OneFl
 
 
 @app.post('/api/applications/{app_id}/documents')
-def upload(app_id: str, kind: DocumentKind = Form(...), file: UploadFile = File(...), user=Header(default='demo-user', alias='X-OneFlow-User')):
+def upload(app_id: str, kind: DocumentKind = Form(...), file: UploadFile = File(...), replace: bool = Form(True), user=Header(default='demo-user', alias='X-OneFlow-User')):
     record = load(app_id, user or 'demo-user')
     if record.get('issued_policy') and kind == 'policy':
         raise HTTPException(409, 'Your existing policy is preloaded. Start a new journey to select a different policy or member.')
@@ -190,14 +201,18 @@ def upload(app_id: str, kind: DocumentKind = Form(...), file: UploadFile = File(
     else:
         raise HTTPException(415, 'Upload a valid PDF, PNG, or JPEG document.')
     try:
-        return public(process_document(record, content, file.filename or 'document', kind, mime))
+        return public(process_document(record, content, file.filename or 'document', kind, mime, replace=replace))
     except HTTPException:
         raise
     except ValueError as error:
         raise HTTPException(422, str(error)) from error
     except Exception as error:
         logger.exception('Document processing failed')
-        raise HTTPException(502, 'Document processing failed. Check Google Cloud credentials, processor location, API access, and document readability. Your existing progress is preserved.') from error
+        if settings.ai_provider == 'sarvam':
+            message = 'Sarvam could not read this document. Check the API key, file quality, supported format, and Sarvam account access. Your existing progress is preserved.'
+        else:
+            message = 'Document processing failed. Check Google Cloud credentials, processor location, API access, and document readability. Your existing progress is preserved.'
+        raise HTTPException(502, message) from error
 
 
 @app.delete('/api/applications/{app_id}/documents/{doc_id}')
@@ -269,8 +284,9 @@ def message(app_id: str, body: Message, user=Header(default='demo-user', alias='
             'journey': record.get('journey', 'reimbursement'), 'cashless': record.get('cashless'),
             'fields': {k: v['value'] for k, v in record['fields'].items()}})
     except Exception as error:
-        logger.exception('Vertex AI explanation failed')
-        raise HTTPException(502, 'Vertex AI is unavailable. Your application is saved; please retry or read the policy directly.') from error
+        logger.exception('%s explanation failed', settings.ai_provider)
+        provider_name = 'Sarvam AI' if settings.ai_provider == 'sarvam' else 'Vertex AI'
+        raise HTTPException(502, f'{provider_name} is unavailable. Your application is saved; please retry or read the policy directly.') from error
     used = [c for c in clauses if c['id'] in answer['clause_ids']]
     record['messages'].extend([
         {'id': str(uuid4()), 'role': 'user', 'text': body.text, 'at': store.now(), 'citations': []},
@@ -327,7 +343,8 @@ def submit_claim(app_id: str, body: SubmitClaim, user=Header(default='demo-user'
     claim = {'application_id': app_id, 'claim_id': 'CLM-' + uuid4().hex[:12].upper(), 'status': 'draft',
              'submitted_at': None, 'updated_at': utc_now(), 'claim_amount': amount,
              'approved_amount': None, 'explanation': '', 'settlement': None, 'timeline': [],
-             'packet_generated_at': record.get('packet_generated_at'), 'document_count': len(record['documents'])}
+             'packet_generated_at': record.get('packet_generated_at'), 'document_count': len(record['documents']),
+             'claim_details': record.get('claim_details', {})}
     claim = simulated_insurer.submit(record, claim)
     record['status'] = 'submitted'
     store.mutate(record, 'claim_submitted', {'claim_id': claim['claim_id'], 'acknowledgement_id': claim['acknowledgement_id'], 'simulation': True})

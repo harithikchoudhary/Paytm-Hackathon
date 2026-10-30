@@ -5,19 +5,29 @@ support a policy conclusion. They are not an insurer coverage decision.
 """
 from datetime import date
 from decimal import Decimal, InvalidOperation
+from .date_utils import parse_document_date
 
 
 def assess(app):
     policy = app.get('issued_policy')
     fields = app.get('fields', {})
     if not policy:
-        return {'status': 'insufficient_policy', 'checks': [], 'explanation': 'A policy schedule is required before policy-specific eligibility can be assessed.', 'indicative_payable_amount': None}
+        # A user-uploaded schedule has no trusted account metadata, so use only
+        # values extracted from that schedule and remain conservative when a
+        # clause or financial limit is absent.
+        policy = {
+            'start_date': fields.get('policy_start', {}).get('value', ''),
+            'end_date': fields.get('policy_end', {}).get('value', ''),
+            'sum_insured': fields.get('sum_insured', {}).get('value', ''),
+        }
+        if not any(policy.values()):
+            return {'status': 'insufficient_policy', 'checks': [], 'explanation': 'Upload your policy schedule before policy-specific eligibility can be assessed.', 'indicative_payable_amount': None}
     checks = []
     start = None
     admission = None
     try:
-        start = date.fromisoformat(policy['start_date'])
-        admission = date.fromisoformat(fields.get('admission_date', {}).get('value', ''))
+        start = parse_document_date(policy.get('start_date', ''))
+        admission = parse_document_date(fields.get('admission_date', {}).get('value', ''))
     except ValueError:
         pass
     if start and admission:
@@ -37,11 +47,14 @@ def assess(app):
         pass
     eligible = None
     if amount is not None and amount.is_finite() and amount >= 0:
-        eligible = min(amount, Decimal(str(policy['sum_insured'])))
+        limit = policy.get('sum_insured')
+        if not limit:
+            return {'status': 'review_required', 'checks': checks, 'explanation': 'The uploaded policy does not provide a usable sum insured. An insurer must assess the payable amount.', 'indicative_payable_amount': None}
+        eligible = min(amount, Decimal(str(limit).replace(',', '')))
         checks.extend([
             {'id': 'deductible', 'result': 'pass', 'clause_id': 'H3', 'explanation': 'The supplied schedule lists INR 0 deductible.'},
             {'id': 'copayment', 'result': 'pass', 'clause_id': 'H3', 'explanation': 'The supplied schedule lists 0% co-payment for eligible inpatient claims.'},
-            {'id': 'sum_insured', 'result': 'pass' if amount <= policy['sum_insured'] else 'uncertain', 'clause_id': 'H3', 'explanation': 'The bill is within the base sum insured.' if amount <= policy['sum_insured'] else 'The bill exceeds the base sum insured; insurer adjudication is required.'},
+            {'id': 'sum_insured', 'result': 'pass' if amount <= Decimal(str(limit).replace(',', '')) else 'uncertain', 'clause_id': 'UPLOADED_POLICY', 'explanation': 'The bill is within the sum insured shown on the uploaded schedule.' if amount <= Decimal(str(limit).replace(',', '')) else 'The bill exceeds the sum insured shown on the uploaded schedule; insurer adjudication is required.'},
         ])
     unknown = any(c['result'] in ('unknown', 'uncertain') for c in checks)
     return {'status': 'review_required' if unknown else 'indicative_only', 'checks': checks,

@@ -8,10 +8,10 @@ ISSUED_POLICY = {
     'id': 'customer-health-2026', 'number': 'OFH-2026-000184',
     'insurer': 'OneFlow Health Insurance Company', 'product': 'OneFlow Care Plus', 'uin': 'OF-CARE-PLUS-2026',
     'start_date': '2026-01-01', 'end_date': '2026-12-31', 'sum_insured': 500000,
-    'holder': 'Amulya', 'is_demo': True, 'wording_url': WORDING_URL,
-    # Keep the stable POC member id so existing saved test journeys remain compatible.
-    'members': [{'id': 'aarav', 'name': 'Amulya', 'relationship': 'Self', 'age': 28}],
-    'notice': 'Fictional testing policy supplied for the OneFlow POC. It is not insurance issued by a real insurer. No live balance or eligibility is available.',
+    'holder': 'Policy holder', 'is_demo': True, 'wording_url': WORDING_URL,
+    # Keep the stable member id so existing saved journeys remain compatible.
+    'members': [{'id': 'aarav', 'name': 'Policy holder', 'relationship': 'Self', 'age': 0}],
+    'notice': 'This policy is a local test record. It is not connected to a live insurer account or balance.',
 }
 HOSPITALS = [
     {'id': 'sunrise-pune', 'name': 'Sunrise Care Hospital', 'city': 'Pune', 'area': 'Baner', 'network': 'sample_network', 'specialties': ['General medicine', 'Orthopaedics'], 'is_demo': True},
@@ -34,17 +34,30 @@ def process_clauses():
         ('H5', 'Reimbursement submission', 2, 'For reimbursement, the schedule says to submit the claim within 30 days of discharge. Payment remains subject to verification, admissibility, available sum insured, and policy conditions.'),
     ]
     return [{'id': key, 'section': section, 'page': page, 'text': text, 'source_url': WORDING_URL,
-             'source_name': 'OneFlow Care Plus policy supplied for this POC', 'summary': True} for key, section, page, text in records]
+             'source_name': 'OneFlow Care Plus policy supplied for this application', 'summary': True} for key, section, page, text in records]
 
 
 def policy_context(app):
     if not app.get('issued_policy'):
-        from .policies import CLAUSES, POLICY_ID
-        return {'id': POLICY_ID, 'name': 'Intentra Health — Synthetic Policy v1', 'clauses': CLAUSES, 'pdf_url': '/api/policy/pdf', 'is_demo': True}
+        uploaded = [d for d in app.get('documents', []) if d.get('kind') == 'policy']
+        if not uploaded:
+            return {'id': None, 'name': 'Upload your policy to see policy guidance', 'clauses': [], 'pdf_url': None, 'is_demo': False}
+        clauses = []
+        for document in uploaded:
+            for field in document.get('extracted', []):
+                clauses.append({
+                    'id': 'UP-' + field['key'],
+                    'section': 'Uploaded policy schedule',
+                    'page': field.get('page', 1),
+                    'source_name': document.get('name', 'Uploaded policy schedule'),
+                    'source_url': f"/api/applications/{app.get('id')}/documents/{document['id']}/file",
+                    'text': f"{field.get('key', 'Policy detail')}: {field.get('value', '')}",
+                })
+        return {'id': 'uploaded-policy', 'name': 'Your uploaded policy schedule', 'clauses': clauses, 'pdf_url': None, 'is_demo': False}
     clauses = process_clauses() + [
-        {'id': 'P1', 'section': 'OneFlow — Preliminary reimbursement checks', 'page': 1, 'source_name': 'OneFlow POC checklist',
-         'source_url': '/api/policy/checklist', 'text': 'This POC checks a preloaded fictional schedule, bill, discharge summary, and bank proof for consistency. A prepared preliminary packet does not satisfy all insurer requirements; check E.1.7 for the complete and conditional document list.'},
-        {'id': 'P2', 'section': 'OneFlow — Cashless simulator checklist', 'page': 1, 'source_name': 'OneFlow POC checklist',
+        {'id': 'P1', 'section': 'OneFlow — Preliminary reimbursement checks', 'page': 1, 'source_name': 'OneFlow checklist',
+         'source_url': '/api/policy/checklist', 'text': 'The checklist compares the policy schedule, hospital bill, discharge summary, and bank proof for consistency. A prepared packet does not satisfy all insurer requirements; review the insurer document list and conditions.'},
+        {'id': 'P2', 'section': 'OneFlow — Cashless simulator checklist', 'page': 1, 'source_name': 'OneFlow checklist',
          'source_url': '/api/policy/checklist', 'text': 'The simulator requires a sample hospital arrangement, insured member, admission details, identity readiness, admission advice, and cost estimate. Every status and amount is simulated. No authorization request is sent and no insurance decision is made.'},
     ]
     return {'id': ISSUED_POLICY['uin'], 'name': 'OneFlow Care Plus — Policy guidance', 'clauses': clauses,
@@ -52,7 +65,7 @@ def policy_context(app):
 
 
 def customer_policy_document(policy, member_id):
-    """Return the supplied policy PDF and the identity fields used by the POC."""
+    """Return the supplied policy PDF and identity fields for the journey."""
     member = next(m for m in policy['members'] if m['id'] == member_id)
     values = {'full_name': member['name'], 'policy_number': policy['number'],
               'policy_start': policy['start_date'], 'policy_end': policy['end_date']}

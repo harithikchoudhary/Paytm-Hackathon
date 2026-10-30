@@ -49,7 +49,7 @@ def create(title, journey='reimbursement', policy=None, member_id='aarav', owner
         'id': str(uuid4()), 'title': title, 'created_at': now(), 'updated_at': now(),
         'documents': [], 'corrections': {}, 'messages': [], 'audit': [],
         'reviewed_at': None, 'revision': 0, 'fields': {}, 'issues': [],
-        'status': 'collecting', 'progress': 0,
+        'status': 'collecting', 'progress': 0, 'claim_details': {},
         'journey': journey, 'issued_policy': policy, 'member_id': member_id, 'owner_id': owner_id,
         'cashless': {'simulation': True, 'status': 'draft', 'details': {}, 'timeline': [], 'authorized_amount': None} if journey == 'cashless' else None,
     })

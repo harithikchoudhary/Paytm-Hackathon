@@ -37,7 +37,7 @@ def sample(kind, conflict=False):
     name = 'Amulya' if kind in ('admission_advice', 'cost_estimate') else ('Aarav Shah' if kind == 'bill' and conflict else 'Aarav Sharma')
     common = [f'Patient name: {name}']
     lines = {
-        'policy': common + ['Policy number: POC-2026-001', 'Policy start: 2026-01-01', 'Policy end: 2026-12-31', 'Sum insured INR: 500000'],
+        'policy': common + ['Policy number: OF-2026-001', 'Policy start: 2026-01-01', 'Policy end: 2026-12-31', 'Sum insured INR: 500000'],
         'bill': common + ['Hospital name: Sunrise Care Hospital', 'Admission date: 2026-10-12', 'Discharge date: 2026-10-15', 'Bill total INR: 48500'],
         'discharge': common + ['Hospital name: Sunrise Care Hospital', 'Admission date: 2026-10-12', 'Discharge date: 2026-10-15'],
         'bank_proof': common + ['Bank account last4: 4821', 'Bank name: Synthetic Demo Bank'],
@@ -67,7 +67,7 @@ def policy_pdf():
     import textwrap
     for page in (1, 2):
         c.setFont('Helvetica-Bold', 20)
-        c.drawString(48, 790, 'Intentra Health - Synthetic Policy v1')
+        c.drawString(48, 790, 'Intentra Health - Health Policy Schedule')
         c.setFont('Helvetica', 10)
         c.drawString(48, 765, 'DEMONSTRATION ONLY - NOT AN INSURANCE PRODUCT')
         y = 710

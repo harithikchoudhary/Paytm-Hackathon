@@ -1,4 +1,5 @@
 from datetime import date
+from .date_utils import parse_document_date
 from decimal import Decimal, InvalidOperation
 from .customer import HOSPITALS
 from . import store
@@ -40,11 +41,13 @@ def check(app):
     if details.get('admission_type') not in ('planned', 'emergency'):
         issue('admission_type', 'Select planned or emergency admission.', 'H1')
     try:
-        admission = date.fromisoformat(details.get('admission_date', ''))
-        if not date.fromisoformat(policy['start_date']) <= admission <= date.fromisoformat(policy['end_date']):
+        admission = parse_document_date(details.get('admission_date', ''))
+        start = parse_document_date(policy.get('start_date', ''))
+        end = parse_document_date(policy.get('end_date', ''))
+        if not admission or not start or not end or not start <= admission <= end:
             issue('period', 'Admission date falls outside the fictional policy period. Insurer verification is required.', 'H1')
     except ValueError:
-        issue('admission_date', 'Provide a valid admission date in YYYY-MM-DD format.', 'H1')
+        issue('admission_date', 'Provide a valid admission date from the hospital record.', 'H1')
     if len(details.get('treatment_summary', '').strip()) < 10:
         issue('treatment', 'Add a short description of the admission or treatment advised by the hospital.')
     try:

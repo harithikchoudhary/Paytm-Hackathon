@@ -3,15 +3,15 @@ from decimal import Decimal, InvalidOperation
 from typing import TypedDict
 from langgraph.graph import StateGraph, START, END
 from .models import FIELDS
-from .policies import POLICY_NUMBER
 from .eligibility import assess
+from .date_utils import parse_document_date
 
 REQUIRED_DOCS = {'policy': 'Policy schedule', 'bill': 'Hospital bill', 'discharge': 'Discharge summary', 'bank_proof': 'Bank account proof'}
 REQUIRED_FIELDS = ['full_name', 'policy_number', 'admission_date', 'discharge_date', 'hospital_name', 'bill_total', 'bank_account_last4', 'policy_start', 'policy_end']
-EXPECTED = {'policy': ['full_name', 'policy_number', 'policy_start', 'policy_end'],
-            'bill': ['full_name', 'hospital_name', 'bill_total', 'admission_date', 'discharge_date'],
-            'discharge': ['full_name', 'hospital_name', 'admission_date', 'discharge_date'],
-            'bank_proof': ['bank_account_last4'],
+EXPECTED = {'policy': ['full_name', 'policy_number', 'policy_start', 'policy_end', 'sum_insured', 'insured_address', 'insured_city', 'insured_state', 'insured_pincode', 'insured_mobile', 'insured_email', 'pan', 'bank_account_number', 'bank_name', 'bank_branch', 'ifsc_code'],
+            'bill': ['full_name', 'hospital_name', 'bill_total', 'admission_date', 'discharge_date', 'patient_dob', 'patient_age', 'patient_gender', 'patient_relationship', 'patient_occupation', 'patient_address', 'admission_time', 'discharge_time', 'room_category', 'hospitalization_reason', 'injury_date', 'injury_cause', 'medico_legal', 'police_reported', 'fir_number', 'system_of_medicine', 'diagnosis', 'procedure_details', 'preauthorization_number', 'pre_hospitalization_expenses', 'hospitalization_expenses', 'post_hospitalization_expenses', 'ambulance_charges', 'pharmacy_expenses', 'investigation_expenses', 'other_expenses', 'domiciliary_hospitalization'],
+            'discharge': ['full_name', 'hospital_name', 'admission_date', 'discharge_date', 'patient_dob', 'patient_age', 'patient_gender', 'patient_relationship', 'patient_occupation', 'patient_address', 'admission_time', 'discharge_time', 'room_category', 'hospitalization_reason', 'injury_date', 'injury_cause', 'medico_legal', 'police_reported', 'fir_number', 'system_of_medicine', 'diagnosis', 'procedure_details', 'preauthorization_number'],
+            'bank_proof': ['bank_account_last4', 'bank_account_number', 'bank_name', 'bank_branch', 'ifsc_code'],
             'admission_advice': ['full_name', 'hospital_name', 'admission_date', 'treatment_summary'],
             'cost_estimate': ['full_name', 'hospital_name', 'estimated_amount']}
 EXPECTED['clarification'] = []
@@ -36,6 +36,16 @@ def assemble(state):
         fields[key]['value'] = value
         fields[key]['confirmed'] = True
     app['fields'] = fields
+    # Keep a structured, insurer-facing view while preserving the evidence-rich field map.
+    sections = {
+        'insured': ['full_name', 'policy_number', 'insured_address', 'insured_city', 'insured_state', 'insured_pincode', 'insured_mobile', 'insured_email', 'pan'],
+        'patient': ['patient_dob', 'patient_age', 'patient_gender', 'patient_relationship', 'patient_occupation', 'patient_address'],
+        'hospitalization': ['hospital_name', 'admission_date', 'admission_time', 'discharge_date', 'discharge_time', 'room_category', 'hospitalization_reason', 'injury_date', 'injury_cause', 'medico_legal', 'police_reported', 'fir_number', 'system_of_medicine'],
+        'clinical': ['diagnosis', 'procedure_details', 'preauthorization_number'],
+        'expenses': ['bill_total', 'pre_hospitalization_expenses', 'hospitalization_expenses', 'post_hospitalization_expenses', 'ambulance_charges', 'pharmacy_expenses', 'investigation_expenses', 'other_expenses', 'domiciliary_hospitalization'],
+        'bank': ['bank_account_last4', 'bank_account_number', 'bank_name', 'bank_branch', 'ifsc_code'],
+    }
+    app['claim_details'] = {section: {key: fields[key]['value'] for key in keys if fields[key]['value']} for section, keys in sections.items()}
     return {'application': app}
 
 
@@ -54,7 +64,7 @@ def validate(state):
     for doc in app['documents']:
         extracted = {v['key'] for v in doc['extracted']}
         for key in EXPECTED[doc['kind']]:
-            if key not in extracted and not fields[key]['confirmed']:
+            if key in REQUIRED_FIELDS and key not in extracted and not fields[key]['confirmed']:
                 issue(f"unreadable_{doc['id']}_{key}", f"Verify {FIELDS[key].lower()} missing from {doc['name']}.", 'C2' if key == 'full_name' else 'C4', field=key)
     for key in REQUIRED_FIELDS:
         f = fields[key]
@@ -67,16 +77,25 @@ def validate(state):
             else:
                 issue('conflict_' + key, f'{f["label"]} differs between documents. Compare the sources and confirm the correct value.', 'C2' if key in ['full_name', 'policy_number', 'hospital_name'] else 'C3', field=key)
     value = lambda key: fields[key]['value']
-    policy_number = app['issued_policy']['number'] if app.get('issued_policy') else POLICY_NUMBER
-    if value('policy_number') and value('policy_number') != policy_number:
-        issue('unsupported_policy', 'This POC only supports synthetic policy POC-2026-001. This uploaded policy cannot be verified.', 'C2', field='policy_number')
+    # Existing customer policies are checked against their account record. For a
+    # newly uploaded schedule, the extracted policy number is the source of
+    # truth; it must not be compared with a platform fixture number.
+    if app.get('issued_policy') and value('policy_number') and value('policy_number') != app['issued_policy']['number']:
+        issue('policy_mismatch', 'The policy number differs from the policy selected for this account.', 'C2', field='policy_number')
     dates = {}
     for key in ['admission_date', 'discharge_date', 'policy_start', 'policy_end']:
         if value(key):
             try:
-                dates[key] = date.fromisoformat(value(key))
+                parsed = parse_document_date(value(key))
+                if parsed:
+                    dates[key] = parsed
+                else:
+                    raise ValueError
             except ValueError:
-                issue('invalid_' + key, f'{FIELDS[key]} must be a valid date in YYYY-MM-DD format.', 'C3', field=key)
+                # Preserve the document's original date text and let the
+                # reviewer/insurer interpret unusual formats. Date formatting
+                # alone must never block claim preparation.
+                issue('unparsed_' + key, f'{FIELDS[key]} was kept as shown in the source document; date ordering could not be checked automatically.', 'C3', severity='warning', field=key)
     if dates.get('admission_date') and dates.get('discharge_date') and dates['admission_date'] > dates['discharge_date']:
         issue('date_order', 'Admission date must be on or before discharge date.', 'C3', field='admission_date')
     if dates.get('policy_start') and dates.get('policy_end') and dates['policy_start'] > dates['policy_end']:
@@ -89,8 +108,11 @@ def validate(state):
             amount = Decimal(value('bill_total').replace(',', ''))
             if not amount.is_finite() or amount <= 0:
                 raise InvalidOperation
-            if amount > (app.get('issued_policy') or {}).get('sum_insured', 500000):
-                issue('over_limit', 'The bill exceeds the synthetic sum insured of INR 500000. Manual insurer review is required.', 'C4', field='bill_total')
+            limit = (app.get('issued_policy') or {}).get('sum_insured') or value('sum_insured')
+            if limit:
+                limit_amount = Decimal(str(limit).replace(',', ''))
+                if amount > limit_amount:
+                    issue('over_limit', f'The bill exceeds the sum insured of INR {limit_amount:,.0f}. Manual insurer review is required.', 'C4', field='bill_total')
         except InvalidOperation:
             issue('invalid_amount', 'Hospital bill total must be a positive INR amount.', 'C4', field='bill_total')
     if value('bank_account_last4') and (len(value('bank_account_last4')) != 4 or not value('bank_account_last4').isascii() or not value('bank_account_last4').isdigit()):
