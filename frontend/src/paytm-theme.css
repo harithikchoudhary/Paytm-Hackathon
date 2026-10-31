@@ -20,3 +20,115 @@ h1,h2,h3{color:#002970}.eyebrow{color:#3376a7}.eyebrow>span{background:#00baf2}.
 
 /* Paytm wordmark lockup */
 .sidebar .paytm-wordmark{color:#fff}.sidebar .oneflow-wordmark{color:#fff}.sidebar .brand-divider{background:#fff}.brand.small .paytm-wordmark{color:#002970}.brand.small .oneflow-wordmark{color:#587ca6}.brand.small .brand-divider{background:#002970}
+
+/* Dashboard reference styling: white canvas, blue hierarchy, and light-blue surfaces. */
+body,.main-column,.main-column main{background:#f8fbff;color:#173a63}.sidebar{width:218px;flex-basis:218px;background:#fff;color:#002970;border-right:1px solid #dceaf6;box-shadow:2px 0 14px #00297008}.sidebar .brand{color:#002970;font-size:20px;padding-left:5px}.sidebar .paytm-wordmark{color:#002970}.sidebar .oneflow-wordmark{color:#002970}.sidebar .brand-divider{background:#002970}.sidebar .workspace-selector{margin-top:27px;margin-bottom:20px;background:#f7fbff;border-color:#d8eaf7}.sidebar .workspace-selector strong{color:#164b78}.sidebar .workspace-selector span{color:#6f8da7}.sidebar .workspace-icon{background:#eaf8ff;border-color:#d7eef9;color:#0079c4}.sidebar .nav-item{height:39px;padding:0 11px;color:#426b89;font-size:11px;border-left:3px solid transparent;border-radius:0 7px 7px 0}.sidebar .nav-item svg{width:16px;height:16px;color:#3b80b1}.sidebar .nav-item.active{background:#e5f5ff;color:#006bb4;border-left-color:#00baf2;font-weight:650}.sidebar .nav-item.active svg{color:#0077c4}.sidebar .nav-item:hover{background:#f1f9ff;color:#006bb4}.sidebar .journeys-label{margin-top:25px}.sidebar .nav-label{color:#7d9ab2;font-size:8px;letter-spacing:.6px}.sidebar .journey-item{color:#547793;font-size:10px}.sidebar .journey-item.selected{background:#edf8ff;color:#006bb4;border-left-color:#00baf2}.sidebar .new-journey{color:#0078ba;font-size:10px}.sidebar .sidebar-bottom{padding-left:4px;padding-right:4px}.sidebar .support-card{background:#f2faff;border-color:#d8edf9}.sidebar .support-card strong{color:#1a4e78}.sidebar .support-card p{color:#6d8ba3}.sidebar .policy-nav{color:#4b7898}.sidebar .profile{border-color:#dceaf6}.sidebar .profile strong{color:#194d78}.sidebar .profile span{color:#7490a5}.sidebar .avatar{background:#e0f6ff;color:#0074b5;border-color:#bde8f8}.main-column{margin-left:218px}.page-heading{padding-top:27px}.page-heading h1{font-size:27px;color:#002970}.page-heading p{font-size:11px;color:#7090a8}.existing-policy-card,.quick-actions-card,.recent-claims-card,.documents-card,.assistant-card,.snapshot-card,.journey-card,.white-card{box-shadow:0 4px 18px #00297008;border-color:#d8e9f6}.existing-policy-card{background:#fff}.existing-policy-brand{background:#f7fbff;border-bottom-color:#e1edf6}.existing-policy-brand>svg{background:#e7f7ff;color:#0079c4;border-color:#d4edf9}.existing-policy-brand>div>span{color:#3179a7}.existing-policy-brand h2{font-size:16px;color:#002970}.existing-policy-brand p{color:#7290a7}.existing-policy-facts span{color:#7794aa}.existing-policy-facts strong{color:#164b78}.quick-actions-card,.recent-claims-card,.documents-card,.assistant-card{background:#fff}.quick-actions-card .section-heading h2,.recent-claims-card .section-heading h2,.documents-card .section-heading h2,.assistant-heading h2{font-size:16px;color:#002970}.quick-actions-grid button{background:#fafdff;border-color:#d4e9f7}.quick-actions-grid button>span{background:#e2f6ff;color:#0078c4}.quick-actions-grid button:nth-child(2)>span{background:#e1faf2;color:#07966a}.quick-actions-grid button:nth-child(3)>span{background:#e6f0ff;color:#126bd1}.quick-actions-grid button:nth-child(4)>span{background:#e5f7ff;color:#0078c4}.quick-actions-grid strong{font-size:11px;color:#153e67}.quick-actions-grid small{font-size:9px;color:#7090a8}.recent-claims-head{background:#f2f8fd;color:#6e8ca5}.recent-claim-row{color:#426a89}.recent-claim-row strong{color:#194d78}.document-checklist{background:#fff}.checklist-info strong{color:#1b4d77}.checklist-info span{color:#7c96aa}.assistant-message{background:#eef8ff;border-color:#d6ecf9}.assistant-message p{color:#426d8f}.assistant-heading .ai-icon{background:#e0f6ff;color:#0079c4}.mode-banner{background:#edf8ff}.button-dark{background:#087be0;border-color:#087be0}.button-dark:hover{background:#006bc7;border-color:#006bc7}.button-white{color:#0873be;border-color:#bfe3f7}.section-heading h2{color:#002970}.counter{background:#e8f7ff;color:#1477b5;border-color:#d2ebf8}.claim-step.active span,.claim-step.done span{background:#087be0;border-color:#087be0}.claim-step.active,.claim-step.done{color:#002970}
+
+/* Reference scale and contrast pass. */
+.sidebar{width:238px;flex-basis:238px;padding-left:21px;padding-right:21px;background:#fff}.main-column{margin-left:238px}.sidebar .brand{font-size:22px;padding-left:3px}.sidebar .workspace-selector{margin-top:30px;padding:13px 10px}.sidebar .nav-item{height:45px;padding:0 12px;font-size:12px;gap:10px}.sidebar .nav-item svg{width:18px;height:18px}.sidebar .nav-label{font-size:9px}.sidebar .journey-item{font-size:11px}.page-heading{margin-bottom:25px;padding-top:34px}.page-heading h1{font-size:31px;letter-spacing:-1.1px}.page-heading p{font-size:12px}.existing-policy-card,.quick-actions-card,.recent-claims-card,.documents-card,.assistant-card{border-color:#c9e0f1;box-shadow:0 5px 22px #2b75a812}.existing-policy-card{margin-bottom:25px}.existing-policy-brand{padding:20px 23px;background:#f3faff}.existing-policy-brand>svg{width:43px;height:43px;padding:8px}.existing-policy-brand h2{font-size:18px}.existing-policy-brand p{font-size:11px}.existing-policy-facts{padding:17px 23px}.existing-policy-facts span{font-size:10px}.existing-policy-facts strong{font-size:13px}.quick-actions-card,.recent-claims-card{padding:24px 25px 12px}.quick-actions-card .section-heading h2,.recent-claims-card .section-heading h2{font-size:19px}.quick-actions-card .section-heading .muted,.recent-claims-card .section-heading .muted{font-size:11px}.quick-actions-grid{gap:14px}.quick-actions-grid button{min-height:126px;padding:17px 11px}.quick-actions-grid button>span{width:47px;height:47px}.quick-actions-grid button>span svg{width:25px;height:25px}.quick-actions-grid strong{font-size:12px}.quick-actions-grid small{font-size:10px}.recent-claims-table{border-color:#c9e0f1}.recent-claims-head,.recent-claim-row{padding:13px 15px;gap:15px}.recent-claims-head{font-size:9px;background:#edf7fd}.recent-claim-row{min-height:61px;font-size:11px}.recent-claim-row strong{font-size:11px}.recent-claim-row small{font-size:9px}.claim-status{font-size:9px;padding:5px 10px}.documents-card,.assistant-card{padding:23px}.documents-card .section-heading h2,.assistant-heading h2{font-size:18px}.documents-card .checklist-row{min-height:68px}.assistant-message{background:#eaf7ff;border-color:#c8e7f7}.assistant-message p{font-size:12px}.assistant-heading .ai-icon{width:43px;height:43px}.section-heading h2{font-size:18px}.counter{font-size:11px;padding:5px 8px}.text-button{font-size:11px}.status-pill{font-size:10px}.card-footnote{font-size:10px;background:#f1f9fe}.button{font-size:12px;padding:12px 18px}
+
+/* Compact dashboard spacing pass. */
+.sidebar .nav-item{height:39px}.sidebar .workspace-selector{margin-top:22px;margin-bottom:14px}.sidebar .journeys-label{margin-top:17px}.page-heading{padding-top:22px;margin-bottom:17px}.existing-policy-card{margin-bottom:16px}.existing-policy-brand{padding:14px 18px}.existing-policy-brand>svg{width:37px;height:37px;padding:7px}.existing-policy-brand h2{font-size:16px}.existing-policy-facts{padding:12px 18px}.quick-actions-card,.recent-claims-card{padding:17px 18px 8px;margin-bottom:16px}.quick-actions-card .section-heading,.recent-claims-card .section-heading{margin-bottom:11px}.quick-actions-grid{gap:9px}.quick-actions-grid button{min-height:96px;padding:11px 8px;gap:5px}.quick-actions-grid button>span{width:39px;height:39px}.quick-actions-grid button>span svg{width:21px;height:21px}.recent-claims-head,.recent-claim-row{padding:9px 11px;gap:10px}.recent-claim-row{min-height:48px}.documents-card,.assistant-card{padding:17px}.documents-card .checklist-row{min-height:57px}.section-heading h2{font-size:16px}.assistant-heading .ai-icon{width:38px;height:38px}.assistant-message{padding:13px}.existing-policy-brand>div>span{font-size:8px}.existing-policy-brand p{font-size:10px}
+.quick-actions-card .section-heading,.recent-claims-card .section-heading{padding:0;margin-bottom:11px}.quick-actions-card{height:auto;min-height:0}.recent-claims-card{height:auto;min-height:0}
+
+.dashboard-header{display:flex;align-items:center;justify-content:space-between;gap:20px;padding:23px 0 20px;margin-bottom:3px;border-bottom:1px solid #e2edf6}.dashboard-header h1{margin:0;color:#002970;font-size:29px;line-height:1.15;letter-spacing:-1px}.dashboard-header p{margin-top:7px;color:#6e8ba4;font-size:12px}.dashboard-header-actions{display:flex;align-items:center;gap:10px;color:#557896;font-size:10px}.dashboard-header-actions .icon-button{color:#2c6897}.dashboard-avatar{width:31px;height:31px;display:grid;place-items:center;border-radius:50%;border:2px solid #d4effb;background:#e0f6ff;color:#0077bb;font-size:13px;font-weight:700}.dashboard-header-actions strong{color:#234e76;font-size:10px}.dashboard-header-actions>svg{color:#6d91aa}@media(max-width:720px){.dashboard-header{padding:17px 0 15px}.dashboard-header h1{font-size:24px}.dashboard-header-actions strong,.dashboard-header-actions>svg{display:none}}
+.legacy-hidden{display:none!important}
+.dashboard-main{padding-top:8px}.dashboard-main .dashboard-header{padding-top:10px}
+
+/* Chat assistant reference layout: conversation center with a focused action rail. */
+.chat-workspace-embedded{display:grid;grid-template-columns:minmax(0,1fr) 235px;width:100%;height:720px;border:1px solid #cfe4f4;border-radius:11px;overflow:hidden;background:#fff;box-shadow:0 5px 22px #0029700d}.chat-workspace-embedded .guided-chat-embedded{height:100%;max-width:none;border:0;border-right:1px solid #dbeaf5;border-radius:0;box-shadow:none}.chat-workspace-embedded .guided-chat-embedded .chat-header{padding:16px 20px}.chat-workspace-embedded .guided-chat-embedded .chat-policy-bar{padding:10px 20px}.chat-workspace-embedded .guided-chat-embedded .chat-quick-actions{display:none}.chat-workspace-embedded .guided-chat-embedded .chat-bubble{max-width:76%;padding:13px;margin-bottom:12px}.chat-workspace-embedded .guided-chat-embedded .chat-messages{padding:20px 18px}.chat-workspace-embedded .guided-chat-embedded .chat-compose{padding:13px 18px}.chat-workspace-embedded .guided-chat-embedded .chat-compose form{background:#fff;border-color:#c9e2f3}.chat-context-panel{display:flex;flex-direction:column;background:#fff}.chat-context-panel section{padding:21px 15px;border-bottom:1px solid #e0edf6}.chat-context-panel h3{margin:0 0 13px;color:#143e69;font-size:13px}.chat-context-panel section>button{width:100%;display:flex;align-items:center;gap:9px;padding:10px 10px;margin-bottom:8px;border:1px solid #cfe4f4;border-radius:7px;background:#fbfdff;color:#194e78;font-size:10px;text-align:left}.chat-context-panel section>button:hover{border-color:#08a6e3;background:#edf9ff;color:#006fb2}.chat-context-panel section>button svg{color:#087dcc}.chat-context-panel .example-question{display:block;white-space:normal;line-height:1.45}.chat-context-panel .example-question:not(:last-child){margin-bottom:7px}.chat-header h2{font-size:17px}.chat-header>div>span{font-size:10px}.chat-clear-button{text-transform:none;padding:8px 12px;color:#0676c0;border-color:#a9d9f2}.chat-workspace-embedded .chat-bubble.assistant{background:#f1f7fb;border-color:#e2edf4}.chat-workspace-embedded .chat-bubble.user{background:#dff3ff;border-color:#d2effe}.chat-workspace-embedded .send-button{background:#0b90e5}.chat-workspace-embedded .guided-upload{max-width:420px;margin-left:auto;margin-right:auto;background:#f7fcff;border-style:dashed;border-color:#9ed7f1;padding:20px;text-align:center;justify-content:center}.chat-workspace-embedded .guided-upload>span{text-align:center}.chat-workspace-embedded .guided-upload>svg:last-child{display:none}@media(max-width:850px){.chat-workspace-embedded{grid-template-columns:1fr;height:calc(100vh - 38px)}.chat-context-panel{display:none}.chat-workspace-embedded .guided-chat-embedded{border-right:0}.chat-workspace-embedded .guided-chat-embedded .chat-messages{padding:16px 13px}}
+
+/* Chat message contrast and participant icons. */
+.chat-message-row{display:flex;align-items:flex-start;gap:10px;margin:0 0 14px}
+.chat-message-row.user{justify-content:flex-end}
+.chat-message-row.user .chat-message-avatar{order:2}
+.chat-message-row .chat-bubble{margin:0;max-width:calc(100% - 42px)}
+.chat-message-avatar{width:31px;height:31px;flex:0 0 31px;display:grid;place-items:center;border-radius:10px;margin-top:2px}
+.chat-message-avatar.assistant{background:#e1f6ff;border:1px solid #bde8f8;color:#007ac4}
+.chat-message-avatar.user{background:#d9efff;border:1px solid #9ed6f2;color:#00659e}
+.chat-workspace-embedded .chat-bubble.user{background:#dff3ff;border-color:#b7e0f6}
+.chat-workspace-embedded .chat-bubble.user p{color:#164f78}
+.chat-workspace-embedded .chat-bubble.user .message-role{color:#1683bd}
+.chat-workspace-embedded .chat-bubble.assistant{color:#194d78}
+.chat-workspace-embedded .chat-bubble.assistant p{color:#416e91}
+.chat-workspace-embedded .chat-message-row .chat-bubble{width:auto}
+/* Keep the participant marker before every message bubble, including user turns. */
+.chat-message-row.user .chat-message-avatar{order:0}
+/* Keep the single New chat control at the far right of the header. */
+.chat-header .chat-header-actions{flex:0 0 auto;margin-left:auto;justify-content:flex-end}
+/* Keep the chat composer visible while the conversation scrolls. */
+.chat-workspace-embedded .guided-chat-embedded{display:flex;flex-direction:column;min-height:0;overflow:hidden}
+.chat-workspace-embedded .guided-chat-embedded .chat-messages{flex:1 1 auto;min-height:0;overflow-y:auto}
+.chat-workspace-embedded .guided-chat-embedded .chat-compose{flex:0 0 auto;position:relative;z-index:2;background:#fff}
+/* Keep scrolling available without showing scrollbar chrome. */
+html,body,*{scrollbar-width:none;-ms-overflow-style:none}
+html::-webkit-scrollbar,body::-webkit-scrollbar,*::-webkit-scrollbar{display:none;width:0;height:0}
+/* Compact, scannable sidebar layout. */
+.sidebar{padding:18px 16px 14px}
+.sidebar>.brand{padding-left:3px;margin-bottom:20px}
+.sidebar nav{gap:3px;margin-top:0}
+.sidebar .nav-item{height:38px;padding:0 11px;gap:10px;font-size:12px;border-radius:8px}
+.sidebar .nav-item.active{box-shadow:inset 3px 0 0 #00baf2}
+.sidebar .journeys-label{margin-top:22px;padding:0 5px}
+.sidebar .journeys-label .nav-label{padding-left:0;font-size:9px;letter-spacing:1px}
+.sidebar .journey-list{margin-top:7px;max-height:150px}
+.sidebar .journey-item{height:31px;padding:0 9px;gap:9px;font-size:11px;border-radius:7px}
+.sidebar .new-journey{height:34px;padding:0 8px;gap:8px;font-size:11px}
+.sidebar .sidebar-bottom{padding-top:22px}
+/* Profile page: remove duplicate hero treatment and keep the useful cards compact. */
+.customer-hub{gap:14px}
+.hub-grid{gap:14px}
+.profile-facts{gap:13px;padding:0 18px 16px}
+.hub-actions .section-heading,.profile-card .section-heading,.policies-card .section-heading{padding:16px 18px 12px}
+/* Keep the global welcome header close to the content. */
+.main-column main{padding-top:14px}
+.dashboard-main{padding-top:0}
+.dashboard-header{padding-top:8px;padding-bottom:12px;margin-bottom:0}
+/* Claim tracking list */
+.all-claims-card{margin-bottom:14px;padding:16px 18px 10px}
+.all-claims-card .section-heading{margin-bottom:10px}
+.all-claims-table{border:1px solid #d9eaf6;border-radius:8px;overflow:hidden}
+.all-claims-head,.all-claim-row{display:grid;grid-template-columns:minmax(150px,1.5fr) .9fr .7fr 1.2fr 22px;align-items:center;gap:12px;text-align:left}
+.all-claims-head{padding:9px 12px;background:#eff7fc;color:#6f8da5;font-size:9px;text-transform:uppercase;letter-spacing:.5px}
+.all-claim-row{width:100%;padding:10px 12px;border-top:1px solid #e7f0f7;background:#fff;color:#416c8c;font-size:10px}
+.all-claim-row:hover,.all-claim-row.selected{background:#f2faff}
+.all-claim-row.selected{box-shadow:inset 3px 0 #00baf2}
+.all-claim-row>span:first-child{display:flex;flex-direction:column;gap:3px;min-width:0}
+.all-claim-row strong{color:#194d78;font-size:10px}
+.all-claim-row small{color:#7a96aa;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.all-claim-row>svg{color:#1683bd}
+@media(max-width:700px){.all-claims-head,.all-claim-row{grid-template-columns:minmax(120px,1.3fr) .8fr 1fr 18px}.all-claims-head span:nth-child(3),.all-claim-row>span:nth-child(3){display:none}}
+/* Remove doubled padding in the all-claims panel. */
+.all-claims-card{padding:0 12px 8px;margin-bottom:12px}
+.all-claims-card .section-heading{padding:13px 6px 9px;margin-bottom:5px}
+.all-claims-card .section-heading h2{font-size:16px}
+.all-claims-card .section-heading .muted{font-size:10px;margin-top:3px}
+.all-claims-table{margin:0 0 2px}
+/* Collapsed journey selector */
+.journeys-toggle{display:flex;align-items:center;justify-content:space-between;width:100%;margin-top:22px;padding:0 5px;border:0;background:transparent;color:#7d9ab2;text-align:left;cursor:pointer}
+.journeys-toggle .nav-label{padding-left:0}
+.journeys-toggle>svg{color:#7ba5c5;transition:transform .18s ease}
+.journeys-toggle[aria-expanded=true]>svg{transform:rotate(180deg)}
+.journeys-toggle:hover .nav-label,.journeys-toggle:hover>svg{color:#0078ba}
+.journeys-toggle + .journey-list{margin-top:7px}
+/* Sidebar account actions */
+.sidebar .sidebar-bottom{padding-bottom:0;gap:0}
+.signout-button{display:flex;align-items:center;gap:8px;width:100%;height:34px;margin:10px 0 0;padding:0 8px;border:1px solid #dceaf6;border-radius:7px;background:#fff;color:#557d9c;font-size:11px;text-align:left;cursor:pointer}
+.signout-button:hover{border-color:#b9dff2;background:#f2faff;color:#006fb2}
+.sidebar .profile{padding:9px 0 6px}
+.signout-button{margin-top:2px}
+.signout-icon{display:grid;place-items:center;width:28px;height:28px;margin-left:auto;padding:0;border:1px solid #dceaf6;border-radius:7px;background:#fff;color:#557d9c;cursor:pointer}
+.signout-icon:hover{border-color:#b9dff2;background:#f2faff;color:#006fb2}
+/* Uploaded evidence summary inside the assistant conversation. */
+.chat-documents{max-width:650px;margin:2px 8px 16px;padding:11px 12px;border:1px solid #cfe6f4;border-radius:9px;background:#fff}
+.chat-documents-heading{display:flex;align-items:center;gap:7px;color:#1a527d;font-size:10px;padding-bottom:7px;border-bottom:1px solid #e5f0f7}
+.chat-documents-heading svg{color:#0787c6}.chat-documents-heading span{margin-left:auto;min-width:18px;padding:3px 6px;border-radius:10px;background:#e9f8ff;color:#0879b5;text-align:center;font-size:9px}
+.chat-document-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 0;border-bottom:1px solid #edf3f8}.chat-document-row:last-child{border-bottom:0;padding-bottom:0}.chat-document-row span{display:flex;flex-direction:column;gap:2px;min-width:0}.chat-document-row b{color:#24577c;font-size:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.chat-document-row small{color:#7b98ad;font-size:9px}.chat-document-row>svg{flex:0 0 auto;color:#09a47b}
+/* Use a light composer focus state instead of the heavy browser outline. */
+.chat-compose textarea:focus{outline:none;box-shadow:none}
+.chat-compose form:focus-within{border-color:#8ed9f4;box-shadow:0 0 0 2px #e5f8ff}
+.chat-bubble p{white-space:pre-line}
+.chat-mic-button{width:34px;height:34px;display:grid;place-items:center;flex:0 0 auto;border:1px solid #b9dff2;border-radius:7px;background:#eef9ff;color:#007dbb;cursor:pointer}.chat-mic-button:hover{background:#dcf4ff}.chat-mic-button.recording{background:#fff0f0;border-color:#ffc4c4;color:#d12d3b;animation:voice-pulse 1.2s infinite}.chat-mic-button:disabled{opacity:.55;cursor:wait}@keyframes voice-pulse{50%{box-shadow:0 0 0 5px #e942421c}}
+.chat-compose .chat-voice-status{color:#007dbb;font-size:11px;text-align:left}.chat-compose .chat-voice-error{color:#b3343b;font-size:11px;text-align:left}
+.chat-speak-button{display:inline-flex;align-items:center;gap:5px;margin-top:8px;padding:4px 7px;border:1px solid #c8e6f5;border-radius:6px;background:#fff;color:#1777ae;font-size:10px;cursor:pointer}.chat-speak-button:hover{background:#e9f8ff}
+.chat-stop-speech{display:flex;align-items:center;gap:5px;margin:7px auto 0;color:#087db5;background:transparent;font-size:11px;cursor:pointer}

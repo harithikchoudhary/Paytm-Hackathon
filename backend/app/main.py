@@ -6,11 +6,11 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import Response, FileResponse
 from fastapi.staticfiles import StaticFiles
 from .config import settings
-from .models import CreateApplication, Correction, Message, AssistantRequest, DemoRequest, DocumentKind, FIELDS, CashlessDetails, SimulationAction, SubmitClaim, InsurerAction, ClarificationResponse
+from .models import CreateApplication, Correction, Message, AssistantRequest, SpeechRequest, DemoRequest, DocumentKind, FIELDS, CashlessDetails, SimulationAction, SubmitClaim, InsurerAction, ClarificationResponse
 from . import store, providers
 from .workflow import run
 from .policies import CLAUSES, POLICY_ID, retrieve
-from .samples import sample, policy_pdf, LABELS, issued_schedule, pdf_bytes
+from .samples import sample, policy_pdf, LABELS, issued_schedule, pdf_bytes, detailed_pdf
 from .export import packet
 from .customer import ISSUED_POLICY, HOSPITALS, issued_policy, policy_context, customer_policy_document, POLICY_PDF_PATH
 from . import cashless
@@ -336,6 +336,41 @@ def assistant_message(body: AssistantRequest, user=Header(default='demo-user', a
     return response
 
 
+@app.post('/api/assistant/transcribe')
+def assistant_transcribe(file: UploadFile = File(...), application_id: str = Form(...),
+                         user=Header(default='demo-user', alias='X-OneFlow-User')):
+    load(application_id, user or 'demo-user')
+    if not settings.sarvam_api_key:
+        raise HTTPException(503, 'Sarvam voice is not configured. Add SARVAM_API_KEY to backend/.env.')
+    mime = (file.content_type or '').split(';', 1)[0].lower()
+    allowed = {'audio/webm', 'audio/ogg', 'audio/mp4', 'audio/mpeg', 'audio/wav', 'audio/x-wav'}
+    if mime not in allowed:
+        raise HTTPException(415, 'Record audio in WebM, OGG, MP4, MP3, or WAV format.')
+    content = file.file.read(10 * 1024 * 1024 + 1)
+    if not content or len(content) > 10 * 1024 * 1024:
+        raise HTTPException(413, 'Record a short message under 10 MB.')
+    try:
+        return providers.sarvam_transcribe_audio(content, file.filename or 'recording.webm', mime)
+    except providers.NoSpeechDetected as error:
+        raise HTTPException(422, 'No speech was detected. Please check your microphone, speak clearly, and try again.') from error
+    except Exception as error:
+        logger.exception('Sarvam transcription failed')
+        raise HTTPException(502, 'Could not transcribe the recording. Please try again or type your message.') from error
+
+
+@app.post('/api/assistant/speech')
+def assistant_speech(body: SpeechRequest, user=Header(default='demo-user', alias='X-OneFlow-User')):
+    load(body.application_id, user or 'demo-user')
+    if not settings.sarvam_api_key:
+        raise HTTPException(503, 'Sarvam voice is not configured. Add SARVAM_API_KEY to backend/.env.')
+    try:
+        audio = providers.sarvam_synthesize_speech(body.text, body.language_code)
+    except Exception as error:
+        logger.exception('Sarvam speech generation failed')
+        raise HTTPException(502, 'Could not generate speech for this reply. The text is still available in chat.') from error
+    return Response(audio, media_type='audio/wav', headers={'Cache-Control': 'no-store'})
+
+
 @app.post('/api/applications/{app_id}/messages/clear')
 def clear_messages(app_id: str, user=Header(default='demo-user', alias='X-OneFlow-User')):
     """Clear the conversational transcript without changing claim data."""
@@ -462,9 +497,8 @@ def cashless_details(app_id: str, body: CashlessDetails, user=Header(default='de
         raise HTTPException(422, 'Patient must match the insured member selected for this journey. Start a new journey to change the patient.')
     if body.hospital_id not in {h['id'] for h in HOSPITALS}:
         raise HTTPException(422, 'Hospital not found in the sample directory.')
-    cashless.invalidate(record)
-    record['cashless']['details'] = body.model_dump()
-    store.mutate(record, 'cashless_details_saved', {'simulation': True, 'hospital': body.hospital_id, 'admission_type': body.admission_type})
+    cashless.save_details(record, body.model_dump())
+    record['audit'][-1]['details'].update({'hospital': body.hospital_id, 'admission_type': body.admission_type})
     return public(store.save(run(record)))
 
 
@@ -504,13 +538,54 @@ def cashless_brief(app_id: str, user=Header(default='demo-user', alias='X-OneFlo
     if record['issues']:
         raise HTTPException(409, 'Complete the preparation checklist before exporting the hospital handoff brief.')
     state = record['cashless']
-    lines = ['SIMULATION ONLY - NO INSURER / TPA REQUEST SENT',
-        f"Fictional policy: {record['issued_policy']['number']}", f"Patient: {record['fields']['full_name']['value']}",
-        f"Hospital: {state['hospital']['name']} (fictional directory)",
-        *[f'{k}: {v}' for k, v in state['details'].items()],
-        'Status: simulated ' + state['status'], 'Any displayed authorized amount is an illustrative simulator value.',
-        'The hospital insurance desk and insurer must confirm actual arrangements, required evidence, authorization and payment.']
-    return Response(pdf_bytes('Cashless hospital handoff brief', lines), media_type='application/pdf',
+    details = state.get('details') or {}
+    hospital = state.get('hospital') or {}
+    documents = record.get('documents') or []
+    fields = record.get('fields') or {}
+    hospital_label = hospital.get('name', details.get('hospital_id', 'Not selected'))
+    location = ', '.join(str(hospital.get(k)) for k in ('area', 'city') if hospital.get(k)) or 'Not available'
+    timeline = state.get('timeline') or []
+    sections = [
+        ('Purpose of this document', [
+            'This is a hospital handoff brief for the cashless assistance workflow. It explains the information collected by OneFlow and the evidence available for the hospital insurance desk.',
+            'It is not an insurer authorization, coverage decision, guarantee of payment, or a request sent to a hospital, insurer, or TPA.',
+        ]),
+        ('Application and policy', [
+            f"Application: {record.get('title', 'Not available')}",
+            f"Application ID: {record.get('id', 'Not available')}",
+            f"Policy number: {(record.get('issued_policy') or {}).get('number', 'Not available')}",
+            f"Insured patient: {fields.get('full_name', {}).get('value') or 'Not available'}",
+            f"Policy period: {(record.get('issued_policy') or {}).get('start_date', 'Not available')} to {(record.get('issued_policy') or {}).get('end_date', 'Not available')}",
+        ]),
+        ('Treatment request captured', [
+            f"Hospital: {hospital_label}", f"Hospital location: {location}",
+            f"Network result: {'Listed in the fictional sample network' if hospital.get('network') == 'sample_network' else 'Unverified'}",
+            f"Admission type: {details.get('admission_type', 'Not available')}",
+            f"Admission date: {details.get('admission_date', 'Not available')}",
+            f"Treatment description: {details.get('treatment_summary', 'Not available')}",
+            f"Estimated cost (INR): {details.get('estimated_amount', 'Not available')}",
+            f"Identity and policy evidence confirmed: {'Yes' if details.get('identity_ready') else 'No'}",
+        ]),
+        ('Evidence available for the handoff', [
+            *[f"{d.get('name', d.get('kind', 'Document'))} · {d.get('kind', 'unknown')} · {len(d.get('extracted', []))} extracted fields" for d in documents],
+            'The hospital must confirm whether these documents meet its actual preauthorization requirements.',
+        ]),
+        ('Preparation and validation', [
+            f"Current workflow status: simulated {state.get('status', 'draft')}",
+            f"Preparation progress: {record.get('progress', 0)}%",
+            *[f"Finding: {issue.get('message', 'Validation finding')}" for issue in record.get('issues', [])],
+            'No blocking findings remain in the saved OneFlow preparation checklist.' if not record.get('issues') else 'Resolve the findings above before asking the hospital to review this handoff.',
+        ]),
+        ('What happens next', [
+            'Take this brief and the listed evidence to the hospital insurance desk. The hospital and insurer decide the actual preauthorization requirements and outcome.',
+            f"OneFlow simulator timeline entries recorded: {len(timeline)}",
+            f"Latest simulator event: {timeline[-1].get('message', 'None recorded') if timeline else 'None recorded'}",
+        ]),
+        ('Simulation notice', [
+            'Any network, preauthorization, authorized amount, discharge review, or settlement status shown by this local workflow is simulated. No funds were transferred and no insurer or TPA request was sent.',
+        ]),
+    ]
+    return Response(detailed_pdf('Cashless hospital handoff brief', sections), media_type='application/pdf',
         headers={'Content-Disposition': 'attachment; filename="cashless-handoff-simulation.pdf"'})
 
 

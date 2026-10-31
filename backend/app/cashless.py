@@ -24,6 +24,21 @@ def invalidate(app):
             'message': 'Application details changed. The simulated request was reset; prepare and submit a new simulation.'})
 
 
+def save_details(app, details):
+    """Persist cashless intake details through the shared workflow state.
+
+    The HTTP form validates a complete payload before calling this service;
+    chat may call it repeatedly with partial extracted values. Merging here
+    keeps both entry points on the same persistence and invalidation path.
+    """
+    invalidate(app)
+    current = app.setdefault('cashless', {}).setdefault('details', {})
+    source = details.get('_source')
+    current.update({key: value for key, value in details.items() if key != '_source' and value not in (None, '')})
+    store.mutate(app, 'cashless_details_saved', {'simulation': True, 'source': 'assistant' if source == 'assistant' else 'form'})
+    return app
+
+
 def check(app):
     cashless = app['cashless']
     details = cashless['details']

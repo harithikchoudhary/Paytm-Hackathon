@@ -4,6 +4,8 @@ frontend/dist
 backend/data
 backend/.env
 tmp
+tmp-priya-chat
+output
 .git
 **/__pycache__
 .pytest_cache

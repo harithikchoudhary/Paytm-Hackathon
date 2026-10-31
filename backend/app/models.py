@@ -98,6 +98,12 @@ class AssistantRequest(BaseModel):
     parameters: dict = Field(default_factory=dict)
 
 
+class SpeechRequest(BaseModel):
+    application_id: str = Field(min_length=1)
+    text: str = Field(min_length=1, max_length=2500)
+    language_code: str = Field(default='en-IN', max_length=12)
+
+
 class AssistantDecision(BaseModel):
     intent: AssistantIntent
     parameters: dict = Field(default_factory=dict)

@@ -42,5 +42,20 @@ export async function api<T>(path: string, options: RequestInit = {}): Promise<T
   }
   return response.json() as Promise<T>
 }
+
+export async function apiAudio(path: string, options: RequestInit = {}): Promise<Blob> {
+  let identity: { id?: string } = {}
+  try { identity = JSON.parse(localStorage.getItem('oneflow-user') || '{}') } catch { /* no local identity */ }
+  const headers = new Headers(options.headers)
+  headers.set('X-OneFlow-User', identity.id || 'guest-user')
+  if (!(options.body instanceof FormData)) headers.set('Content-Type', 'application/json')
+  const response = await fetch('/api' + path, { ...options, headers })
+  if (!response.ok) {
+    let detail = `Voice request failed (${response.status})`
+    try { const data = await response.json(); detail = data.detail || detail } catch { /* retain fallback */ }
+    throw new Error(detail)
+  }
+  return response.blob()
+}
 export const labels: Record<Kind, string> = { policy: 'Policy schedule', bill: 'Hospital bill', discharge: 'Discharge summary', bank_proof: 'Bank account proof', admission_advice: 'Admission advice', cost_estimate: 'Hospital cost estimate', clarification: 'Clarification document' }
 export const statusLabels: Record<string, string> = { collecting: 'In progress', needs_attention: 'Needs attention', review: 'Ready for review', ready: 'Packet ready', submitted: 'Submitted', claim_resubmitted: 'Resubmitted', claim_clarification_requested: 'Action needed · Clarification', claim_approved: 'Approved', claim_partially_approved: 'Partially approved', claim_rejected: 'Rejected', claim_settled: 'Settled', cashless_draft: 'Prepare cashless request', cashless_submitted: 'Submitted', cashless_information_required: 'More information', cashless_resubmitted: 'Resubmitted', cashless_authorized: 'Authorized', cashless_declined: 'Declined', cashless_discharge_review: 'Discharge review', cashless_settled: 'Settled' }

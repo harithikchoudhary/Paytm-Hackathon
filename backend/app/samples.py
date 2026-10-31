@@ -33,6 +33,65 @@ def pdf_bytes(title, lines):
     return out.getvalue()
 
 
+def detailed_pdf(title, sections, subtitle='Prepared from the saved OneFlow application record'):
+    """Render a readable, evidence-oriented document for a downloaded workflow artifact.
+
+    ``sections`` is a list of ``(heading, lines)`` pairs.  Keeping this renderer
+    alongside the existing sample renderer means the API routes retain their
+    current download contracts while the generated documents can explain the
+    actual workflow state in enough detail for a customer or reviewer.
+    """
+    out = BytesIO()
+    c = canvas.Canvas(out, pagesize=A4)
+    c.setTitle(title)
+    import textwrap
+
+    def header():
+        c.setFillColorRGB(.04, .14, .2)
+        c.setFont('Helvetica-Bold', 20)
+        c.drawString(48, 795, 'OneFlow AI')
+        c.setFont('Helvetica', 9)
+        c.setFillColorRGB(.28, .38, .46)
+        c.drawString(48, 778, subtitle)
+        c.setStrokeColorRGB(.78, .87, .92)
+        c.line(48, 765, 547, 765)
+
+    def footer():
+        c.setStrokeColorRGB(.84, .89, .93)
+        c.line(48, 42, 547, 42)
+        c.setFillColorRGB(.38, .45, .5)
+        c.setFont('Helvetica', 8)
+        c.drawString(48, 28, 'OneFlow AI · Generated from saved application data')
+        c.drawRightString(547, 28, f'Page {c.getPageNumber()}')
+
+    header()
+    c.setFillColorRGB(.04, .14, .2)
+    c.setFont('Helvetica-Bold', 17)
+    c.drawString(48, 735, title)
+    y = 705
+    for heading, lines in sections:
+        if y < 105:
+            footer(); c.showPage(); header(); y = 735
+        c.setFillColorRGB(.02, .39, .7)
+        c.setFont('Helvetica-Bold', 12)
+        c.drawString(48, y, str(heading))
+        y -= 21
+        c.setFillColorRGB(.08, .16, .22)
+        for line in lines or ['Not available']:
+            wrapped_lines = textwrap.wrap(str(line), width=82) or ['']
+            for wrapped in wrapped_lines:
+                if y < 70:
+                    footer(); c.showPage(); header(); y = 735
+                c.setFont('Helvetica', 9.5)
+                c.drawString(58, y, wrapped)
+                y -= 15
+            y -= 2
+        y -= 9
+    footer()
+    c.save()
+    return out.getvalue()
+
+
 def sample(kind, conflict=False):
     name = 'Amulya' if kind in ('admission_advice', 'cost_estimate') else ('Aarav Shah' if kind == 'bill' and conflict else 'Aarav Sharma')
     common = [f'Patient name: {name}']

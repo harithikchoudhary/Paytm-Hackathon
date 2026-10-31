@@ -104,6 +104,596 @@ a {
     min-height: 100vh
 }
 
+.landing-page {
+    min-height: 100vh;
+    background: #fff;
+    color: #19375b;
+    overflow: hidden
+}
+
+.landing-header {
+    max-width: 1240px;
+    margin: 0 auto;
+    padding: 22px 34px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid #e7f0f8
+}
+
+.landing-header .brand {
+    font-size: 21px
+}
+
+.landing-header nav {
+    display: flex;
+    gap: 29px;
+    margin-left: auto;
+    margin-right: 34px;
+    font-size: 12px;
+    color: #557493
+}
+
+.landing-header nav a:hover {
+    color: #002970
+}
+
+.landing-actions {
+    display: flex;
+    gap: 9px
+}
+
+.landing-actions .button {
+    padding: 10px 17px;
+    font-size: 11px
+}
+
+.landing-hero {
+    max-width: 1240px;
+    min-height: 475px;
+    margin: 0 auto;
+    padding: 74px 55px 52px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    align-items: center;
+    gap: 35px;
+}
+
+.landing-kicker {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 7px 12px;
+    border-radius: 18px;
+    color: #006fa9;
+    background: #e8f8ff;
+    font-size: 10px;
+    font-weight: 650;
+    text-transform: uppercase;
+    letter-spacing: .5px
+}
+
+.landing-copy h1 {
+    margin-top: 21px;
+    color: #002970;
+    font-size: clamp(35px, 4.3vw, 58px);
+    line-height: 1.08;
+    letter-spacing: -2px
+}
+
+.landing-copy h1 strong {
+    color: #0876c4;
+    font-weight: 700
+}
+
+.landing-copy>p {
+    max-width: 480px;
+    margin-top: 20px;
+    color: #63809c;
+    font-size: 14px;
+    line-height: 1.8
+}
+
+.landing-hero-actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 28px
+}
+
+.landing-hero-actions .button {
+    padding: 13px 21px;
+    font-size: 12px
+}
+
+.landing-visual {
+    min-height: 330px;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center
+}
+
+.landing-glow {
+    position: absolute;
+    width: 340px;
+    height: 280px;
+    border-radius: 50%;
+    background: radial-gradient(circle, #d9f5ff 0, #eefaff 48%, #fff 74%);
+    box-shadow: 0 0 0 28px #f4fbff
+}
+
+.landing-robot {
+    position: relative;
+    z-index: 1;
+    width: 142px;
+    height: 155px;
+    border-radius: 62px 62px 46px 46px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    color: #fff;
+    background: linear-gradient(145deg, #00baf2, #0877c5 62%, #002970);
+    box-shadow: 0 17px 32px #00297025, inset 0 1px #ffffff99
+}
+
+.landing-robot:before {
+    content: '';
+    position: absolute;
+    inset: 15px 17px 26px;
+    border: 2px solid #ffffffcc;
+    border-radius: 45px 45px 35px 35px
+}
+
+.landing-robot span {
+    font-size: 13px;
+    font-weight: 800;
+    letter-spacing: 1px
+}
+
+.landing-float {
+    position: absolute;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 13px 16px;
+    border: 1px solid #d5eafa;
+    border-radius: 9px;
+    background: #fff;
+    color: #285d85;
+    box-shadow: 0 10px 24px #00297012;
+    font-size: 10px
+}
+
+.landing-float svg {
+    color: #00a9e4
+}
+
+.float-top { top: 20px; right: 1px }
+.float-mid { top: 119px; right: 8px }
+.float-bottom { bottom: 32px; right: 27px }
+
+.landing-features {
+    max-width: 1140px;
+    margin: 0 auto;
+    padding: 23px 34px 37px;
+    border-top: 1px solid #e7f0f8;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 22px
+}
+
+.landing-features article {
+    text-align: center
+}
+
+.landing-features article>span {
+    width: 43px;
+    height: 43px;
+    margin: 0 auto 11px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #0079c4;
+    background: #e8f8ff;
+    border-radius: 50%
+}
+
+.landing-features strong {
+    display: block;
+    color: #163c67;
+    font-size: 12px
+}
+
+.landing-features p {
+    margin-top: 5px;
+    color: #7891a8;
+    font-size: 10px
+}
+
+.quick-actions-card {
+    padding: 21px 23px 23px;
+    margin-bottom: 23px;
+    border: 1px solid #dfeaf5;
+    border-radius: 10px;
+    background: #fff;
+    box-shadow: 0 3px 16px #00297004
+}
+
+/* The dashboard stays focused on the four primary workspace sections. */
+.dashboard-extra {
+    display: none !important
+}
+
+.quick-actions-card .section-heading {
+    margin-bottom: 17px
+}
+
+.quick-actions-card .section-heading h2 {
+    font-size: 17px
+}
+
+.quick-actions-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px
+}
+
+.quick-actions-grid button {
+    min-height: 112px;
+    padding: 15px 9px 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    border: 1px solid #d5e9f7;
+    border-radius: 8px;
+    color: #174b76;
+    background: linear-gradient(180deg, #fff, #f8fcff);
+    text-align: center
+}
+
+.quick-actions-grid button:hover {
+    border-color: #00baf2;
+    box-shadow: 0 5px 15px #00baf218;
+    transform: translateY(-1px)
+}
+
+.quick-actions-grid button>span {
+    width: 39px;
+    height: 39px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    color: #0076c1;
+    background: #e5f7ff
+}
+
+.quick-actions-grid strong {
+    font-size: 10px;
+    color: #164b78
+}
+
+.quick-actions-grid small {
+    font-size: 8px;
+    color: #7792a9
+}
+
+.claim-stepper {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    max-width: 760px;
+    margin: 0 auto 19px;
+    position: relative
+}
+
+.claim-stepper:before {
+    content: '';
+    position: absolute;
+    left: 12%;
+    right: 12%;
+    top: 15px;
+    height: 2px;
+    background: #dceaf5
+}
+
+.claim-step {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    color: #7795ad;
+    font-size: 9px
+}
+
+.claim-step span {
+    width: 31px;
+    height: 31px;
+    display: grid;
+    place-items: center;
+    border: 2px solid #bcd2e5;
+    border-radius: 50%;
+    color: #6f91ae;
+    background: #fff;
+    font-size: 11px
+}
+
+.claim-step strong {
+    font-size: 9px;
+    font-weight: 600
+}
+
+.claim-step.active,
+.claim-step.done {
+    color: #002970
+}
+
+.claim-step.active span,
+.claim-step.done span {
+    border-color: #087de1;
+    background: #087de1;
+    color: #fff
+}
+
+.claim-step.active strong {
+    font-weight: 750
+}
+
+.recent-claims-card {
+    padding: 21px 23px 9px;
+    margin-bottom: 23px;
+    border: 1px solid #dfeaf5;
+    border-radius: 10px;
+    background: #fff;
+    box-shadow: 0 3px 16px #00297004
+}
+
+.recent-claims-card .section-heading {
+    margin-bottom: 14px
+}
+
+.recent-claims-card .section-heading h2 {
+    font-size: 17px
+}
+
+.recent-claims-table {
+    border: 1px solid #e4edf6;
+    border-radius: 7px;
+    overflow: hidden
+}
+
+.recent-claims-head,
+.recent-claim-row {
+    display: grid;
+    grid-template-columns: 1.7fr 1fr .7fr 1.15fr 22px;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 12px;
+    text-align: left
+}
+
+.recent-claims-head {
+    color: #7792a8;
+    background: #f6faff;
+    font-size: 8px;
+    text-transform: uppercase;
+    letter-spacing: .3px
+}
+
+.recent-claim-row {
+    width: 100%;
+    min-height: 52px;
+    border-top: 1px solid #edf3f8;
+    color: #385f80;
+    font-size: 10px
+}
+
+.recent-claim-row:hover {
+    background: #f8fcff
+}
+
+.recent-claim-row>span:first-child {
+    display: flex;
+    flex-direction: column;
+    gap: 4px
+}
+
+.recent-claim-row strong {
+    color: #164b78;
+    font-size: 10px
+}
+
+.recent-claim-row small {
+    color: #8198aa;
+    font-size: 8px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap
+}
+
+.recent-claim-row>svg {
+    color: #2683bd
+}
+
+.claim-status {
+    display: inline-flex;
+    padding: 4px 8px;
+    border-radius: 13px;
+    background: #fff6dc;
+    color: #9b7724;
+    font-style: normal;
+    font-size: 8px;
+    white-space: nowrap
+}
+
+.claim-status.positive {
+    background: #dff9ed;
+    color: #16815b
+}
+
+.packet-ready-card {
+    max-width: 650px;
+    margin: 0 auto 23px;
+    padding: 30px 30px 24px;
+    text-align: center
+}
+
+.packet-hero {
+    display: flex;
+    flex-direction: column;
+    align-items: center
+}
+
+.packet-icon {
+    position: relative;
+    width: 75px;
+    height: 75px;
+    display: grid;
+    place-items: center;
+    margin-bottom: 16px;
+    border-radius: 23px;
+    color: #087de1;
+    background: #eaf8ff;
+    box-shadow: 0 0 0 15px #f5fbff
+}
+
+.packet-icon>svg:last-child {
+    position: absolute;
+    right: -4px;
+    bottom: -2px;
+    padding: 2px;
+    width: 23px;
+    height: 23px;
+    border-radius: 50%;
+    color: #fff;
+    background: #18b47b
+}
+
+.packet-hero h2 {
+    margin-top: 11px;
+    color: #002970;
+    font-size: 23px;
+    text-transform: capitalize
+}
+
+.packet-hero p {
+    max-width: 420px;
+    margin-top: 9px;
+    color: #6f8da7;
+    font-size: 11px;
+    line-height: 1.8
+}
+
+.packet-included {
+    margin: 27px 0 20px;
+    padding: 16px 19px;
+    border: 1px solid #d9edf8;
+    border-radius: 8px;
+    background: #f5fbff;
+    text-align: left
+}
+
+.packet-included h3 {
+    margin-bottom: 8px;
+    color: #174b78;
+    font-size: 11px
+}
+
+.packet-included>div {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 5px 0;
+    color: #477494;
+    font-size: 10px
+}
+
+.packet-included svg {
+    color: #16ab79
+}
+
+.packet-submit .review-checkbox {
+    max-width: none;
+    margin-bottom: 13px;
+    text-align: left
+}
+
+.packet-actions {
+    display: flex;
+    justify-content: center;
+    gap: 10px
+}
+
+.packet-submit>small {
+    display: block;
+    margin-top: 12px;
+    color: #8aa1b4;
+    font-size: 9px
+}
+
+@media (max-width: 760px) {
+    .landing-header {
+        padding: 18px 17px
+    }
+
+    .landing-header nav {
+        display: none
+    }
+
+    .landing-actions .button-white {
+        display: none
+    }
+
+    .landing-hero {
+        min-height: auto;
+        padding: 55px 24px 25px;
+        display: flex;
+        flex-direction: column;
+        align-items: stretch
+    }
+
+    .landing-copy h1 {
+        font-size: 39px
+    }
+
+    .landing-visual {
+        min-height: 290px;
+        transform: scale(.88)
+    }
+
+    .landing-features {
+        grid-template-columns: 1fr 1fr;
+        padding: 20px 17px 30px;
+        gap: 24px 12px
+    }
+
+    .quick-actions-grid {
+        grid-template-columns: 1fr 1fr
+    }
+
+    .recent-claims-card {
+        padding: 18px 12px 7px
+    }
+
+    .recent-claims-head,
+    .recent-claim-row {
+        grid-template-columns: 1.5fr .9fr 1fr 20px;
+        gap: 7px;
+        padding: 10px 8px
+    }
+
+    .recent-claims-head>span:nth-child(3),
+    .recent-claim-row>span:nth-child(3) {
+        display: none
+    }
+}
+
 .sidebar {
     width: 246px;
     flex: 0 0 246px;
