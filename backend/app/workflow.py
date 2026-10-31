@@ -4,6 +4,7 @@ from typing import TypedDict
 from langgraph.graph import StateGraph, START, END
 from .models import FIELDS
 from .eligibility import assess
+from .risk import assess as assess_risk
 from .date_utils import parse_document_date
 
 REQUIRED_DOCS = {'policy': 'Policy schedule', 'bill': 'Hospital bill', 'discharge': 'Discharge summary', 'bank_proof': 'Bank account proof'}
@@ -119,6 +120,7 @@ def validate(state):
         issue('invalid_bank', 'Enter exactly four digits for the bank account suffix.', 'C4', field='bank_account_last4')
     app['issues'] = issues
     app['eligibility'] = assess(app)
+    app['risk_assessment'] = assess_risk(app)
     return {'application': app}
 
 

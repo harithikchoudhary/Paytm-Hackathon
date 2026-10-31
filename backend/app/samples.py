@@ -38,7 +38,10 @@ def sample(kind, conflict=False):
     common = [f'Patient name: {name}']
     lines = {
         'policy': common + ['Policy number: OF-2026-001', 'Policy start: 2026-01-01', 'Policy end: 2026-12-31', 'Sum insured INR: 500000'],
-        'bill': common + ['Hospital name: Sunrise Care Hospital', 'Admission date: 2026-10-12', 'Discharge date: 2026-10-15', 'Bill total INR: 48500'],
+        'bill': common + ['Hospital name: Sunrise Care Hospital', 'Admission date: 2026-10-12', 'Discharge date: 2026-10-15',
+                          'Room charges: INR 18000', 'Doctor consultation: INR 8500', 'Medicines: INR 7500',
+                          'Diagnostics: INR 6500', 'Non-medical convenience: INR 1500', 'Nursing charges: INR 6500',
+                          'Bill total INR: 48500'],
         'discharge': common + ['Hospital name: Sunrise Care Hospital', 'Admission date: 2026-10-12', 'Discharge date: 2026-10-15'],
         'bank_proof': common + ['Bank account last4: 4821', 'Bank name: Synthetic Demo Bank'],
         'admission_advice': common + ['Hospital name: Sunrise Care Hospital', 'Admission date: 2026-10-31', 'Treatment summary: Planned orthopaedic procedure advised by the treating doctor'],

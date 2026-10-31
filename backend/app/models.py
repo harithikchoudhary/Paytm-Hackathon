@@ -83,6 +83,26 @@ class Message(BaseModel):
     text: str = Field(min_length=1, max_length=2000)
 
 
+AssistantIntent = Literal[
+    'general_chat', 'policy_question', 'start_claim', 'get_claim_details',
+    'update_claim_field', 'upload_document_guidance', 'get_validation_issues',
+    'confirm_review', 'prepare_packet', 'submit_claim', 'get_claim_status',
+    'respond_to_clarification'
+]
+
+
+class AssistantRequest(BaseModel):
+    text: str = Field(min_length=1, max_length=2000)
+    application_id: str | None = None
+    confirmation: bool = False
+    parameters: dict = Field(default_factory=dict)
+
+
+class AssistantDecision(BaseModel):
+    intent: AssistantIntent
+    parameters: dict = Field(default_factory=dict)
+
+
 class DemoRequest(BaseModel):
     scenario: Literal['complete', 'missing', 'conflict'] = 'missing'
 

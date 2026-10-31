@@ -1,12 +1,12 @@
 import logging
 from pathlib import Path
 from uuid import uuid4
-from fastapi import FastAPI, HTTPException, UploadFile, File, Form, Header
+from fastapi import FastAPI, HTTPException, UploadFile, File, Form, Header, Query
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import Response, FileResponse
 from fastapi.staticfiles import StaticFiles
 from .config import settings
-from .models import CreateApplication, Correction, Message, DemoRequest, DocumentKind, FIELDS, CashlessDetails, SimulationAction, SubmitClaim, InsurerAction, ClarificationResponse
+from .models import CreateApplication, Correction, Message, AssistantRequest, DemoRequest, DocumentKind, FIELDS, CashlessDetails, SimulationAction, SubmitClaim, InsurerAction, ClarificationResponse
 from . import store, providers
 from .workflow import run
 from .policies import CLAUSES, POLICY_ID, retrieve
@@ -14,6 +14,8 @@ from .samples import sample, policy_pdf, LABELS, issued_schedule, pdf_bytes
 from .export import packet
 from .customer import ISSUED_POLICY, HOSPITALS, issued_policy, policy_context, customer_policy_document, POLICY_PDF_PATH
 from . import cashless
+from . import object_store
+from . import assistant
 from .insurer import simulated_insurer, utc_now
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s %(name)s %(message)s')
@@ -63,9 +65,12 @@ def process_document(record, content, name, kind, mime, replace=False):
     related_keys = {f['key'] for d in previous for f in d['extracted']} | {f['key'] for f in extracted}
     for key in related_keys:
         record['corrections'].pop(key, None)
+    storage_uri = object_store.put(record['id'], doc_id, suffix, content, mime)
+    line_items = providers.extract_line_items(pages, kind)
     record['documents'].append({'id': doc_id, 'name': Path(name.replace('\\', '/')).name[:160],
         'kind': kind, 'mime': mime, 'size': len(content), 'page_count': len(pages),
-        'path': str(path), 'pages': pages, 'extracted': extracted,
+        'path': str(path), 'storage_uri': storage_uri, 'pages': pages, 'extracted': extracted,
+        'line_items': line_items,
         'provider': ('Sarvam Vision + Sarvam Chat' if settings.ai_provider == 'sarvam' else 'Document AI + Vertex AI') if settings.oneflow_mode == 'cloud' else 'Demo parser', 'uploaded_at': store.now()})
     if not (record.get('journey') == 'cashless' and kind in ('bill', 'discharge') and (record.get('cashless') or {}).get('status') in ('authorized', 'discharge_review')):
         cashless.invalidate(record)
@@ -77,6 +82,7 @@ def process_document(record, content, name, kind, mime, replace=False):
     result = store.save(result)
     for old in removed:
         Path(old['path']).unlink(missing_ok=True)
+        object_store.delete(old)
     return result
 
 
@@ -163,9 +169,10 @@ def create(body: CreateApplication, user=Header(default='demo-user', alias='X-On
         directory.mkdir(parents=True, exist_ok=True)
         path = directory / (doc_id + '.pdf')
         path.write_bytes(content)
+        storage_uri = object_store.put(record['id'], doc_id, '.pdf', content, 'application/pdf')
         record['documents'].append({'id': doc_id, 'name': 'existing-policy-schedule-demo.pdf', 'kind': 'policy',
             'mime': 'application/pdf', 'size': len(content), 'page_count': 1, 'path': str(path), 'pages': [],
-            'extracted': extracted, 'provider': 'Existing customer policy — fictional fixture', 'uploaded_at': store.now(), 'preloaded': True})
+            'storage_uri': storage_uri, 'extracted': extracted, 'provider': 'Existing customer policy — fictional fixture', 'uploaded_at': store.now(), 'preloaded': True})
         store.mutate(record, 'existing_policy_loaded', {'policy': policy['number'], 'member': body.member_id, 'fictional': True})
     return public(store.save(run(record)))
 
@@ -233,15 +240,21 @@ def remove_document(app_id: str, doc_id: str, user=Header(default='demo-user', a
     cashless.invalidate(record)
     result = store.save(run(record))
     Path(doc['path']).unlink(missing_ok=True)
+    object_store.delete(doc)
     return public(result)
 
 
 @app.get('/api/applications/{app_id}/documents/{doc_id}/file')
-def original_document(app_id: str, doc_id: str, user=Header(default='demo-user', alias='X-OneFlow-User')):
-    doc = next((d for d in load(app_id, user or 'demo-user')['documents'] if d['id'] == doc_id), None)
+def original_document(app_id: str, doc_id: str, owner: str | None = Query(default=None), user: str | None = Header(default=None, alias='X-OneFlow-User')):
+    identity = (user or owner or 'demo-user').strip()[:120]
+    doc = next((d for d in load(app_id, identity)['documents'] if d['id'] == doc_id), None)
     if not doc:
         raise HTTPException(404, 'Document not found.')
-    return FileResponse(doc['path'], media_type=doc['mime'], filename=doc['name'], content_disposition_type='inline')
+    try:
+        content = object_store.read(doc)
+    except FileNotFoundError as error:
+        raise HTTPException(404, 'Document content is no longer available.') from error
+    return Response(content=content, media_type=doc['mime'], headers={'Content-Disposition': f'inline; filename="{doc["name"]}"'})
 
 
 @app.patch('/api/applications/{app_id}/fields/{key}')
@@ -292,6 +305,43 @@ def message(app_id: str, body: Message, user=Header(default='demo-user', alias='
         {'id': str(uuid4()), 'role': 'user', 'text': body.text, 'at': store.now(), 'citations': []},
         {'id': str(uuid4()), 'role': 'assistant', 'text': answer['answer'], 'at': store.now(), 'citations': used},
     ])
+    return public(store.save(record))
+
+
+@app.post('/api/assistant/message')
+def assistant_message(body: AssistantRequest, user=Header(default='demo-user', alias='X-OneFlow-User')):
+    """Route a conversational message through validated backend actions.
+
+    Existing applications are always owner-scoped. A message without an
+    application can still use the existing general chat endpoint, but claim
+    actions require a selected application and policy/member context.
+    """
+    identity = user or 'demo-user'
+    record = load(body.application_id, identity) if body.application_id else next(
+        (item for item in store.all_applications() if item.get('owner_id', 'demo-user') == identity), None)
+    if not record:
+        raise HTTPException(409, 'Select or start an application before using claim actions in chat.')
+    check_cloud()
+    try:
+        result = assistant.handle(record, body.text, body.confirmation, body.parameters)
+    except HTTPException:
+        raise
+    except Exception as error:
+        logger.exception('Assistant action failed')
+        raise HTTPException(502, 'I could not complete that action. Your saved application is unchanged; please try again.') from error
+    active_id = (result.get('application') or {}).get('id', record['id'])
+    updated = store.get(active_id) or record
+    response = public(updated)
+    response['assistant'] = {k: v for k, v in result.items() if k != 'application'}
+    return response
+
+
+@app.post('/api/applications/{app_id}/messages/clear')
+def clear_messages(app_id: str, user=Header(default='demo-user', alias='X-OneFlow-User')):
+    """Clear the conversational transcript without changing claim data."""
+    record = load(app_id, user or 'demo-user')
+    record['messages'] = []
+    store.mutate(record, 'assistant_chat_cleared', {})
     return public(store.save(record))
 
 

@@ -20,6 +20,8 @@ class Settings(BaseSettings):
     document_ai_location: str = 'us'
     document_ai_processor_id: str = ''
     frontend_origin: str = 'http://localhost:5173'
+    gcs_bucket: str = ''
+    gcs_prefix: str = 'oneflow'
 
     def cloud_missing(self) -> list[str]:
         if self.ai_provider == 'sarvam':
